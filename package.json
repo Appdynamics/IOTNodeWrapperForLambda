@@ -1,0 +1,19 @@
+{
+  "name": "@appdynamicsnodelambda/nodelambda",
+  "version": "1.0.0",
+  "description": "Use the AppDynamics IOT Agent to configure nodeJS lambda timings",
+  "main": "appdynamics/AppAgent.js",
+  "scripts": {
+    "start": "npm run build:live",
+    "build": "clean.bat & tsc & zipit.bat"
+  },
+  "author": "Michael Sickles",
+  "license": "ISC",
+  "dependencies": {
+    "npm": "^6.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^10.12.10",
+    "terser-webpack-plugin": "^1.1.0"
+  }
+}
