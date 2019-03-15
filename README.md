@@ -7,6 +7,7 @@ A javascript node library to report lambda timing using IOT Agent
 
 An AppDynamics Controller.  
 An AppDynamics IOT API Key.
+NPM
 
 ### Usage 
 
@@ -36,11 +37,13 @@ set value to "true" to enable the agent or "false" to disable the agent
 
 ### Building Package
 
-
+For initial setup run the folloiwng command
 ```
 npm install
 ```
-then 
+
+
+To generate appdynamics module folder run 
 ```
 tsc
 ```
