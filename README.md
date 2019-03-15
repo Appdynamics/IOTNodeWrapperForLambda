@@ -6,7 +6,7 @@ A javascript node library to report lambda timing using IOT Agent
 ### Prerequisites
 
 An AppDynamics Controller.  
-An AppDynamics IOT API Key.
+An AppDynamics IOT API Key.  
 NPM
 
 ### Usage 
