@@ -14,7 +14,7 @@ A step by step to quick get up and running
 
 1. add appdynamics lib to labmda function folder
 
-*Note* see Building Package below on how to build the appdynamics lib
+**Note** see Building Package below on how to build the appdynamics lib
 
 2. Import AppAgent.js Transaction at top of index.js with all of your module.exports functions 
 
