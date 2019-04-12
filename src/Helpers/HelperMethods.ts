@@ -76,41 +76,28 @@ class HelperMethods {
         if (properties) {
             if (properties.stringProperties) {
                 if (event.stringProperties) {
-                    for (let key in properties.stringProperties) {
-                        event.stringProperties[key] = properties.stringProperties[key] as string;
-                    }
+                    event.stringProperties = {...event.stringProperties, ...properties.stringProperties}
                 } else {
                     event.stringProperties = properties.stringProperties;
                 }
             }
             if (properties.doubleProperties) {
                 if (event.doubleProperties) {
-                    for (let key in properties.doubleProperties) {
-
-                        event.doubleProperties[key] = properties.doubleProperties[key] as number;
-                    }
+                    event.doubleProperties = {...event.doubleProperties, ...properties.doubleProperties}
                 } else {
                     event.doubleProperties = properties.doubleProperties;
                 }
             }
             if (properties.booleanProperties) {
                 if (event.booleanProperties) {
-                    for (let key in properties.booleanProperties) {
-
-                        event.booleanProperties[key] = properties.booleanProperties[key] as boolean;
-
-                    }
+                    event.booleanProperties = {...event.booleanProperties, ...properties.booleanProperties}
                 } else {
                     event.booleanProperties = properties.booleanProperties;
                 }
             }
             if (properties.datetimeProperties) {
                 if (event.datetimeProperties) {
-                    for (let key in properties.datetimeProperties) {
-
-                        event.datetimeProperties[key] = properties.datetimeProperties[key] as number;
-
-                    }
+                    event.datetimeProperties = {...event.datetimeProperties, ...properties.datetimeProperties}
                 } else {
                     event.datetimeProperties = properties.datetimeProperties;
                 }

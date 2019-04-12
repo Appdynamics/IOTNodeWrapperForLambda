@@ -2,7 +2,7 @@ import { IOT } from "./IOT";
 import { Timer } from "./Timer"
 import { HelperMethods } from "../Helpers/HelperMethods"
 import { ExitCall } from  "./ExitCall"
-import { NetworkRequestEvent, TransactionConfiguration, IOTBeacon, BeaconProperties, ErrorEvent, CustomEvent, StringMap, ExitCallMap } from "../index"
+import { NetworkRequestEvent, TransactionConfiguration, IOTBeacon, BeaconProperties, ErrorEvent, CustomEvent, StringMap, ExitCallMap, BooleanMap, NumberMap } from "../index"
 import { Logger } from "../Helpers/Logger"
 import { eventNames } from "cluster";
 
@@ -13,7 +13,7 @@ class Transaction {
     timer: Timer;
     exitCalls: ExitCallMap;
     version: string = "1.0.1";
-    beaconProperties?: BeaconProperties;
+    beaconProperties: BeaconProperties;
 
     constructor(config: TransactionConfiguration, beaconProperties? : BeaconProperties) {
         this.config = config;
@@ -21,7 +21,18 @@ class Transaction {
         this.isValid = true;
         this.timer = new Timer();
         this.exitCalls = {};
-        this.beaconProperties = beaconProperties;
+
+        this.beaconProperties = {
+            stringProperties: {},
+            datetimeProperties: {},
+            booleanProperties: {},
+            doubleProperties: {}
+            
+        }
+        if(beaconProperties){
+            this.customData(beaconProperties);
+        }
+
         if (!HelperMethods.isValid(cust_config, 'transactionName')) {
             this.isValid = false;
             Logger.error(`Invalid or missing transactionName`)
@@ -52,6 +63,22 @@ class Transaction {
             appKey: this.config.appKey,
             collector: this.config.collector as string
         });
+    }
+
+    customData(properties?: BeaconProperties) {
+        if(!properties){
+            return;
+        }
+        var sp:StringMap = this.beaconProperties.stringProperties as StringMap;
+        var bp:BooleanMap= this.beaconProperties.booleanProperties as BooleanMap;
+        var dp:NumberMap = this.beaconProperties.doubleProperties as NumberMap;
+        var dtp:NumberMap = this.beaconProperties.datetimeProperties as NumberMap;
+
+        this.beaconProperties.stringProperties  = {...sp, ...properties.stringProperties }
+        this.beaconProperties.booleanProperties  = {...bp, ...properties.booleanProperties }
+        this.beaconProperties.doubleProperties  = {...dp, ...properties.doubleProperties }
+        this.beaconProperties.datetimeProperties  = {...dtp, ...properties.datetimeProperties }
+
     }
 
     stop(properties?: BeaconProperties) {
@@ -88,10 +115,8 @@ class Transaction {
                 eventType: this.config.transactionType,
                 uniqueClientId: this.config.uniqueClientId as string
             }
-            if(this.beaconProperties) {
-                err = HelperMethods.setPropertiesOnEvent(err, properties) as ErrorEvent;
-            }
-            err = HelperMethods.setPropertiesOnEvent(err, properties) as ErrorEvent;
+            this.customData(properties);
+            err = HelperMethods.setPropertiesOnEvent(err, this.beaconProperties) as ErrorEvent;
 
             beacon.errorEvents = [err];
             if (this.iot) {
@@ -129,10 +154,11 @@ class Transaction {
                     end: this.timer.endDT as number
                 }
             }
+            this.customData(properties)
             if(this.beaconProperties) {
                 customevent = HelperMethods.setPropertiesOnEvent(customevent, this.beaconProperties) as CustomEvent;
             }
-            customevent = HelperMethods.setPropertiesOnEvent(customevent, properties) as CustomEvent;
+            ///customevent = HelperMethods.setPropertiesOnEvent(customevent, properties) as CustomEvent;
             beacon.customEvents = [customevent];
             return beacon;
         } else {
