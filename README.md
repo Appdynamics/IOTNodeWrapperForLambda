@@ -48,9 +48,11 @@ To generate appdynamics module folder run
 tsc
 ```
 
-#### Custom data
+### Custom data
 
-Custom Properties can be sent at a transactional level.  The function takes an object that contains a signature like so:
+Custom Properties can be sent at a transactional level.  The function takes an object that contains dictionaries for each of the different data types.
+
+Signature:
 
 ```
 stringProperties?: StringMap;
@@ -58,6 +60,20 @@ booleanProperties?: BooleanMap;
 doubleProperties?: NumberMap;
 datetimeProperties?: NumberMap;
 ```
+
+stringProperties: object
+A map of the string properties of this event. There cannot be more than 16 string properties per event. Entry keys have a max length of 24 characters. Entry values have a max length of 128 characters. Entry keys cannot contain the pipe character '|'. Valid Examples: { "username": "john.doe" }
+
+booleanProperties: object
+A map of the boolean properties of this event. There cannot be more than 16 boolean properties per event. Entry keys have a max length of 24 characters. Entry keys cannot contain the pipe character '|'. Valid Examples: { "error": false }
+
+doubleProperties: object
+A map of the double properties of this event. There cannot be more than 16 double properties per event. Entry keys have a max length of 24 characters. Entry keys cannot contain the pipe character '|'. Valid Examples: { "Fahrenheit": 98.2 }
+
+datetimeProperties: object
+A map of the datetime properties of this event, in millisecond epoch time. There cannot be more than 16 datetime properties per event. Entry keys have a max length of 24 characters. Entry keys cannot contain the pipe character '|'. Valid Examples: { "bootTime": 1487119625012 }
+
+
 
 Example usage:
 
