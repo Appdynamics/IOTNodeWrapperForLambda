@@ -9,11 +9,11 @@ class HTTPInterceptor {
         // override the function
         http.request = function wrapMethodRequest(req: any) {
             if (req.host && req.host.indexOf("amazonaws") >= 0) {
-                return originalRequest.apply(this, arguments);
+                return originalRequest.apply(this, arguments as any );
             }
             //appdynamics request ignore
             if (req.hostname && req.hostname.indexOf("appdynamics") >= 0) {
-                return originalRequest.apply(this, arguments);
+                return originalRequest.apply(this, arguments as any);
             }
 
             if (global.txn) {
@@ -60,7 +60,7 @@ class HTTPInterceptor {
                     args[1] = onRes;
                 } catch (err) {
                     Logger.debug('Problem Building Interceptor. Defaulting to original request.');
-                    return originalRequest.apply(this, arguments);
+                    return originalRequest.apply(this, arguments as any);
                 }
 
                 var oldreq = originalRequest.apply(this, args);
@@ -83,7 +83,7 @@ class HTTPInterceptor {
             }
 
 
-            return originalRequest.apply(this, arguments);
+            return originalRequest.apply(this, arguments as any);
         }
     }
 }

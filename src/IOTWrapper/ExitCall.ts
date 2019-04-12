@@ -102,8 +102,6 @@ class ExitCall {
             beacon.customEvents = [customevent];
         }
 
-
-
         return beacon;
     }
     reportError(errorevent: ErrorEvent, properties?: BeaconProperties) {
