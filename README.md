@@ -47,6 +47,28 @@ To generate appdynamics module folder run
 ```
 tsc
 ```
+
+#### Custom data
+
+Custom Properties can be sent at a transactional level.  The function takes an object that contains a signature like so:
+
+```
+stringProperties?: StringMap;
+booleanProperties?: BooleanMap;
+doubleProperties?: NumberMap;
+datetimeProperties?: NumberMap;
+```
+
+Example usage:
+
+```
+    if(global.txn){
+        global.txn.customData({
+            stringProperties: { 'MyProperty': 'MyStringValue'}
+        });
+    }
+```
+
 ## Authors
 
 * **Michael Sickles** - *Initial work* - michael.sickles@appdynamics.com
