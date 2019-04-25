@@ -3,10 +3,7 @@
   "version": "1.0.0",
   "description": "Use the AppDynamics IOT Agent to configure nodeJS lambda timings",
   "main": "appdynamics/AppAgent.js",
-  "scripts": {
-    "start": "npm run build:live",
-    "build": "clean.bat & tsc & zipit.bat"
-  },
+  "types": "appdynamics/index.d.ts",
   "author": "Michael Sickles",
   "license": "ISC",
   "dependencies": {

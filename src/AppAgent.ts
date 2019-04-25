@@ -5,28 +5,37 @@ import { AWSInterceptor } from "./Interceptors/AWSInterceptor";
 import { Logger } from "./Helpers/Logger";
 import { HelperMethods } from "./Helpers/HelperMethods";
 class AppAgent {
-    static init(exports: any, config: AppConfig) {
-        if(!(process.env.APPDYNAMICS_ENABLED && process.env.APPDYNAMICS_ENABLED === "true")) {
-            console.log('Appdynamics::Info::Appdynamics instrumentation is not enabled.')
-            return exports;
+    static init(func: any, config?: AppConfig) {
+        if(!config) {
+            config = {} as AppConfig;
         }
-        Logger.init(config.loglevels || {});
+        if (!(process.env.APPDYNAMICS_ENABLED && process.env.APPDYNAMICS_ENABLED === "true")) {
+            console.log('Appdynamics::Info::Appdynamics instrumentation is not enabled.')
+            return func;
+        }
+        if(process.env.loglevel) {
+            Logger.init(process.env.loglevel);
+        } else {
+            Logger.init(config.loglevel || "ERROR");
+        }
+
+
         function isFunction(functionToCheck: any) {
             var string2check = {}.toString.call(functionToCheck);
             return functionToCheck && (string2check === '[object Function]' || string2check === '[object AsyncFunction]');
         }
-        for (var func in exports) {
-            Logger.info(`Potential function: ${func}`)
-            if (isFunction(exports[func])) {
-                Logger.info(`Instrumenting ${func}`)
-                var old = exports[func];
-                exports[func] = function (event: any, context: any, callback: any) {
+            var newfunc = undefined;
+
+            Logger.info(`Potential function: ${func.name}`)
+            if (isFunction(func)) {
+                Logger.info(`Instrumenting ${func.name}`)
+                var old = func;
+                    newfunc = function (event: any, context: any, callback: any) {
                     Logger.debug(`Intrumenting func: ${func}`);
                     var uuid;
                     var contextExists: boolean = true;
                     var callbackExists: boolean = true;
                     var requestID = '';
-
                     if (!context) {
                         Logger.warn('context not given in function, generating uuid');
                         contextExists = false;
@@ -34,16 +43,33 @@ class AppAgent {
                     } else {
                         requestID = context.awsRequestId;
                     }
-                    if (config.uniqueIDHeader && event.headers && event.headers[config.uniqueIDHeader]) {
+                    if (config && config.uniqueIDHeader && event.headers && event.headers[config.uniqueIDHeader]) {
                         uuid = event.headers[config.uniqueIDHeader];
                     }
                     Logger.debug('Creating transaction');
-                    global.AppConfig = config;
+                    global.AppConfig = config || {};
+                    if(!config) {
+                        config = {};
+                    }
                     var findHeader = HelperMethods.findEventHeaderInformation(event);
-                    if(findHeader.headersFound) {
+                    var appkey = '<NO KEY SET>';
+                    if (config.appKey) {
+                        Logger.debug('appKey in config.');
+                        appkey = config.appKey;
+                    } else if (process.env.appKey) {
+                        Logger.debug('appKey in Environment.');
+                        appkey = process.env.appKey;
+                    } else if (event.stageVariables && event.stageVariables.appKey) {
+                        Logger.debug('appKey in Stage Var.');
+                        appkey = event.appKey;
+                    } else {
+                        Logger.error('No appKey found');
+                    }
+                    Logger.debug(appkey);
+                    if (findHeader.headersFound) {
                         global.txn = new Transaction({
                             version: process.env.AWS_LAMBDA_FUNCTION_VERSION as string,
-                            appKey: config.appKey,
+                            appKey: appkey || '',
                             transactionName: requestID,
                             transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME as string,
                             uniqueClientId: uuid
@@ -52,7 +78,7 @@ class AppAgent {
                     } else {
                         global.txn = new Transaction({
                             version: process.env.AWS_LAMBDA_FUNCTION_VERSION as string,
-                            appKey: config.appKey,
+                            appKey: appkey || '',
                             transactionName: requestID,
                             transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME as string,
                             uniqueClientId: uuid
@@ -66,7 +92,7 @@ class AppAgent {
                         Logger.warn('callback not given in function, have to stop txn in process.exit synchronously');
                         callbackExists = false;
                         //Cleanup
-                        
+
 
                     };
                     process.once('beforeExit', function () {
@@ -105,7 +131,7 @@ class AppAgent {
                         process.exit(1);
                     };
 
-                    var reportRejectionToAppDynamics = function(reason:any, promise:any) {
+                    var reportRejectionToAppDynamics = function (reason: any, promise: any) {
                         if (global.txn) {
 
                             global.txn.reportError({ name: "UnHandledRejection", message: JSON.stringify(reason) });
@@ -116,7 +142,7 @@ class AppAgent {
                     if (callbackExists) {
                         var newcallback = function () {
                             Logger.info(`Stopping ${global.txn.config.transactionName}:${global.txn.config.transactionType}`);
-                            
+
                             // 
                             if (global.txn) {
                                 global.txn.stop();
@@ -157,7 +183,7 @@ class AppAgent {
 
                 }
             }
-        }
+        
         try {
 
 
@@ -180,9 +206,13 @@ class AppAgent {
             Logger.error('Interceptors failed to load');
         }
 
+        if(newfunc) {
+            return newfunc;
+        } else {
+             return func;
+        }
 
-
-        return exports;
+        //return new;
     }
 }
 export { AppAgent }

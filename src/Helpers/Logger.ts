@@ -1,40 +1,51 @@
-import { LogLevels } from "../index"
+import { LOGLEVEL } from "../index"
 class Logger {
-    static levels:LogLevels = {
-        debug: false,
-        info: false,
-        warn: true,
-        error: true
-    }
+    static level:LOGLEVEL = LOGLEVEL.ERROR;
+
+
     static appString = "Appdynamics";
     static print(level:string, msg: string) {
         console.log(`${this.appString}::${level}::${msg}`)
     }
-    static init(levels:LogLevels) {
-        if(levels) {
-            this.levels.debug = levels.debug || this.levels.debug;
-            this.levels.info = levels.info || this.levels.info;
-            this.levels.warn = levels.warn || this.levels.warn;
-            this.levels.error = levels.error || this.levels.error;
+    static init(level:string) {
+        if(level) {
+            switch(level) {
+                case "DEBUG":
+                    this.level = LOGLEVEL.DEBUG;
+                    break;
+                case "INFO":
+                    this.level = LOGLEVEL.INFO;
+                    break;
+                case "WARN":
+                    this.level = LOGLEVEL.WARN;
+                    break;
+                case "ERROR":
+                    this.level = LOGLEVEL.ERROR;;
+                    break;
+                default:
+                    break;
+                
+            }
+          
         }
     }
     static debug(msg:string) {
-        if(this.levels.debug) {
+        if(LOGLEVEL.DEBUG >= this.level) {
             this.print('DEBUG', msg);
         }
     }
     static info(msg:string) {
-        if(this.levels.info) {
+        if(LOGLEVEL.INFO >= this.level) {
             this.print('INFO', msg);
         }
     }
     static warn(msg:string) {
-        if(this.levels.warn) {
+        if(LOGLEVEL.WARN >= this.level) {
             this.print('WARN', msg);
         }
     }
     static error(msg:string) {
-        if(this.levels.error) {
+        if(LOGLEVEL.ERROR >= this.level) {
             this.print('ERROR', msg);
         }
     }

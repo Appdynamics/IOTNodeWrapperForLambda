@@ -17,15 +17,25 @@ A step by step to quick get up and running
 
 **Note** see Building Package below on how to build the appdynamics lib
 
-2. Import AppAgent.js Transaction at top of index.js with all of your module.exports functions 
+2. Import AppAgent.ts Transaction at top of each handler function
 
 ```
-const AppAgent = require("./apdynamics/AppAgent.js").AppAgent;
+const AppAgent = require("./apdynamics/AppAgent.ts").AppAgent;
 ```
 
-3.  Initialize the AppAgent at end of index.js with all of your module.exports functions
+3.  Initialize the AppAgent at end of your handler by passing in the handler function
 ```
-exports = AppAgent.init(exports, {appKey: 'IOT-KEY' })
+import { AppAgent } from './appdynamics/AppAgent'
+
+var myhandler =  (event: any, context: any, callback: any) => {
+    callback(null, 'success');
+}
+myhandler = AppAgent.init(handler, {
+    lambdaHeaders: {
+        "headertolookfor":true
+    }
+});
+export { myhandler }
 ```
 4.  Add the following enivronment variable in lambda
 
@@ -34,6 +44,8 @@ APPDYNAMICS_ENABLED
 ```
 
 set value to "true" to enable the agent or "false" to disable the agent
+
+
 
 ### Building Package
 

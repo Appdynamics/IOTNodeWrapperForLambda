@@ -7,9 +7,14 @@ class IOT {
     config: IOTConfig;
     path: string;
     sync:boolean = false;
+    isValid:boolean = true;
 
     constructor(config: IOTConfig) {
         this.config = config;
+        if(this.config.appKey === '<NO KEY SET>') {
+            this.isValid = false;
+            Logger.warn('Appkey is not set, no beacons will be sent.');
+        }
         this.path = `/eumcollector/iot/v1/application/${this.config.appKey}/beacons`;
     }
     sendBeaconSync(beacon: IOTBeacon) {
@@ -59,9 +64,9 @@ class IOT {
 
     }
      sendBeacon(beacon: IOTBeacon) {
-        if(this.sync) {
+        if(this.sync && this.isValid) {
             this.sendBeaconSync(beacon);
-        } else {
+        } else if (this.isValid){
             this.sendBeaconAsync(beacon).catch((err) => { Logger.error(err)});
         }
     }

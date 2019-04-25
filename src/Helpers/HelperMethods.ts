@@ -14,7 +14,7 @@ class HelperMethods {
         }
         return obj;
     }
-    static goThroughHeaders(res: any, append: string,  configMap: StringMap): any {
+    static goThroughHeaders(res: any, append: string,  configMap: BooleanMap): any {
         var headersFound = false;
         var BeaconProperties: BeaconProperties = {
             stringProperties: {}
@@ -37,13 +37,13 @@ class HelperMethods {
         }
     }
     static findEventHeaderInformation(event: any): any {
-        return HelperMethods.goThroughHeaders(event, '_evt', global.AppConfig.lambdaHeaders as StringMap);
+        return HelperMethods.goThroughHeaders(event, '_evt', global.AppConfig.lambdaHeaders as BooleanMap);
     }
     static findResponHeaderInformation(res: any): any {
-        return HelperMethods.goThroughHeaders(res, '_res',  global.AppConfig.responseHeaders as StringMap);
+        return HelperMethods.goThroughHeaders(res, '_res',  global.AppConfig.responseHeaders as BooleanMap);
     }
     static findRequestHeaderInformation(req: any): any {
-        return HelperMethods.goThroughHeaders(req,  '_req', global.AppConfig.requestHeaders as StringMap);
+        return HelperMethods.goThroughHeaders(req,  '_req', global.AppConfig.requestHeaders as BooleanMap);
     }
     static formatResponseHeaders(headers: StringMap) {
         var responseHeaders: ResponseHeaders = {};

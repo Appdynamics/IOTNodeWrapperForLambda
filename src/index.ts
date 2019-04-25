@@ -136,21 +136,24 @@ export interface TransactionConfiguration {
 }
 
 export interface AppConfig {
-    appKey: string;
+    appKey?: string;
     uniqueIDHeader?: string;
-    loglevels?: LogLevels;
+    loglevel?: string;
     paramsToShow?: BooleanMap;
     paramsToHide?: BooleanMap;
-    lambdaHeaders?: StringMap;
-    requestHeaders?: StringMap;
-    responseHeaders?: StringMap;
+    lambdaHeaders?: BooleanMap;
+    requestHeaders?: BooleanMap;
+    responseHeaders?: BooleanMap;
 
 }
-export interface LogLevels {
-    debug?: boolean,
-    info?: boolean,
-    warn?: boolean,
-    error?: boolean
+
+export enum LOGLEVEL {
+    DEBUG = 0,
+    INFO = 2,
+    WARN = 3,
+    ERROR = 4, 
+    OFF = 5
+
 }
 declare global {
     namespace NodeJS {
