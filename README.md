@@ -20,7 +20,7 @@ A step by step to quick get up and running
 2. Import AppAgent.ts Transaction at top of each handler function
 
 ```
-const AppAgent = require("./apdynamics/AppAgent.ts").AppAgent;
+import { AppAgent } from './appdynamics/AppAgent'
 ```
 
 3.  Initialize the AppAgent at end of your handler by passing in the handler function
