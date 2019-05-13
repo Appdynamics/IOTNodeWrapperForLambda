@@ -30,7 +30,7 @@ import { AppAgent } from './appdynamics/AppAgent'
 var myhandler =  (event: any, context: any, callback: any) => {
     callback(null, 'success');
 }
-myhandler = AppAgent.init(handler, {
+myhandler = AppAgent.init(myhandler, {
     lambdaHeaders: {
         "headertolookfor":true
     }
