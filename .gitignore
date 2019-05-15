@@ -16,7 +16,7 @@ $RECYCLE.BIN/
 *.msp
 
 node_modules/*
-appdynamics/*
+
 
 *.zip
 
