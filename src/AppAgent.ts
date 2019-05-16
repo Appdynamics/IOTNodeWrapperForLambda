@@ -9,16 +9,23 @@ class AppAgent {
         if (!config) {
             config = {} as AppConfig;
         }
+        var processenvironmentset_enabled = false
         if (process.env.APPDYNAMICS_ENABLED && process.env.APPDYNAMICS_ENABLED === "false") {
+            processenvironmentset_enabled = true;
             console.info('Appdynamics::Info::Appdynamics instrumentation is not enabled.')
             return func;
+        } else if (process.env.APPDYNAMICS_ENABLED && process.env.APPDYNAMICS_ENABLED === "true")  {
+            processenvironmentset_enabled = true;
         }
 
         var loglevel = 'OFF';
+        var logset = false;
         if (config.loglevel) {
             loglevel = config.loglevel;
+            logset = true;
         } else if (process.env.APPDYNAMICS_LOGLEVEL) {
             loglevel = process.env.APPDYNAMICS_LOGLEVEL;
+            logset = true;
         }
         Logger.init(loglevel);
 
@@ -38,7 +45,7 @@ class AppAgent {
                 if (event.stageVariables && event.stageVariables.APPDYNAMICS_LOGLEVEL) {
                     Logger.debug('loglevel in Stage Var.');
                     var loglevel = event.APPDYNAMICS_LOGLEVEL;
-                    Logger.init(loglevel);
+                    if(!logset) { Logger.init(loglevel);}
                 }
 
                 Logger.debug(`Intrumenting func: ${func}`);
@@ -79,7 +86,7 @@ class AppAgent {
 
                 Logger.debug(appkey);
                 var instrumentationenabled = true;
-                if ((process.env.APPDYNAMICS_ENABLED && process.env.APPDYNAMICS_ENABLED === "true") || (event.stageVariables && event.stageVariables.APPDYNAMICS_ENABLED === "true")) {
+                if ((process.env.APPDYNAMICS_ENABLED && process.env.APPDYNAMICS_ENABLED === "true") || (!processenvironmentset_enabled && event.stageVariables && event.stageVariables.APPDYNAMICS_ENABLED === "true")) {
                     if (findHeader.headersFound) {
                         global.txn = new Transaction({
                             version: process.env.AWS_LAMBDA_FUNCTION_VERSION as string,
