@@ -78,6 +78,7 @@ class AppAgent {
 
 
                 Logger.debug(appkey);
+                var instrumentationenabled = true;
                 if ((process.env.APPDYNAMICS_ENABLED && process.env.APPDYNAMICS_ENABLED === "true") || (event.stageVariables && event.stageVariables.APPDYNAMICS_ENABLED === "true")) {
                     if (findHeader.headersFound) {
                         global.txn = new Transaction({
@@ -98,6 +99,7 @@ class AppAgent {
                         });
                     }
                 } else {
+                    instrumentationenabled = false;
                     Logger.warn('Appdynamics::Warn::Appdynamics instrumentation is not enabled.');
                 }
 
@@ -110,50 +112,53 @@ class AppAgent {
 
 
                 };
-                process.once('beforeExit', function () {
-                    //if the transaction hasn't been stopped (like in an exception) send the data
-                    if (global.txn && global.txn.iot && global.txn.timer && !global.txn.timer.end_process_time) {
-                        Logger.info(`Stopping ${global.txn.config.transactionName}:${global.txn.config.transactionType}`);
-                        Logger.info('Process about to exit');
-                        try {
+
+                if (instrumentationenabled) {
+                    process.once('beforeExit', function () {
+                        //if the transaction hasn't been stopped (like in an exception) send the data
+                        if (global.txn && global.txn.iot && global.txn.timer && !global.txn.timer.end_process_time) {
+                            Logger.info(`Stopping ${global.txn.config.transactionName}:${global.txn.config.transactionType}`);
+                            Logger.info('Process about to exit');
+                            try {
+                                global.txn.stop();
+                            } catch (err) {
+                                //eat any errors for graceful exit
+                                Logger.error(err.message)
+                            }
+
+                        }
+                    });
+                    process.removeAllListeners('uncaughtException');
+                    var reportExceptionToAppDynamics = function (err: any) {
+                        if (global.txn && global.txn.iot) {
+                            //global.txn.iot.sync = true;
+                        }
+                        if (global.txn) {
+
+                            //Connection issues, dont wan't to end up in loop of beacons stop gracefully
+                            if (err.message === "ECONNRESET") {
+                                Logger.warn("Potential Communication issue.  Stopping communication to AppDynamics Collector for graceful shutdown.")
+                                process.exit(1);
+                            }
+                            global.txn.reportError({ name: "UnCaughtExceptions", message: JSON.stringify(err) });
                             global.txn.stop();
-                        } catch (err) {
-                            //eat any errors for graceful exit
-                            Logger.error(err.message)
+
+                            Logger.info(`Stopping ${global.txn.config.transactionName}:${global.txn.config.transactionType}`);
+
                         }
 
-                    }
-                });
-                process.removeAllListeners('uncaughtException');
-                var reportExceptionToAppDynamics = function (err: any) {
-                    if (global.txn && global.txn.iot) {
-                        //global.txn.iot.sync = true;
-                    }
-                    if (global.txn) {
+                        process.exit(1);
+                    };
 
-                        //Connection issues, dont wan't to end up in loop of beacons stop gracefully
-                        if (err.message === "ECONNRESET") {
-                            Logger.warn("Potential Communication issue.  Stopping communication to AppDynamics Collector for graceful shutdown.")
-                            process.exit(1);
+                    var reportRejectionToAppDynamics = function (reason: any, promise: any) {
+                        if (global.txn) {
+
+                            global.txn.reportError({ name: "UnHandledRejection", message: JSON.stringify(reason) });
                         }
-                        global.txn.reportError({ name: "UnCaughtExceptions", message: JSON.stringify(err) });
-                        global.txn.stop();
-
-                        Logger.info(`Stopping ${global.txn.config.transactionName}:${global.txn.config.transactionType}`);
-
-                    }
-
-                    process.exit(1);
-                };
-
-                var reportRejectionToAppDynamics = function (reason: any, promise: any) {
-                    if (global.txn) {
-
-                        global.txn.reportError({ name: "UnHandledRejection", message: JSON.stringify(reason) });
-                    }
-                };
-                process.on('uncaughtException', reportExceptionToAppDynamics);
-                process.on('unhandledRejection', reportRejectionToAppDynamics);
+                    };
+                    process.on('uncaughtException', reportExceptionToAppDynamics);
+                    process.on('unhandledRejection', reportRejectionToAppDynamics);
+                }
                 if (callbackExists) {
                     var newcallback = function () {
                         Logger.info(`Stopping ${global.txn.config.transactionName}:${global.txn.config.transactionType}`);
