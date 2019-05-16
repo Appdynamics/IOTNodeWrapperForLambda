@@ -9,8 +9,8 @@ class AppAgent {
         if (!config) {
             config = {} as AppConfig;
         }
-        if (!(process.env.APPDYNAMICS_ENABLED && process.env.APPDYNAMICS_ENABLED === "true")) {
-            console.log('Appdynamics::Info::Appdynamics instrumentation is not enabled.')
+        if (process.env.APPDYNAMICS_ENABLED && process.env.APPDYNAMICS_ENABLED === "false") {
+            console.info('Appdynamics::Info::Appdynamics instrumentation is not enabled.')
             return func;
         }
 
@@ -78,25 +78,28 @@ class AppAgent {
 
 
                 Logger.debug(appkey);
-                if (findHeader.headersFound) {
-                    global.txn = new Transaction({
-                        version: process.env.AWS_LAMBDA_FUNCTION_VERSION as string,
-                        appKey: appkey || '',
-                        transactionName: requestID,
-                        transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME as string,
-                        uniqueClientId: uuid
-                    }, findHeader.beaconProperties);
+                if ((process.env.APPDYNAMICS_ENABLED && process.env.APPDYNAMICS_ENABLED === "true") || (event.stageVariables && event.stageVariables.APPDYNAMICS_ENABLED === "true")) {
+                    if (findHeader.headersFound) {
+                        global.txn = new Transaction({
+                            version: process.env.AWS_LAMBDA_FUNCTION_VERSION as string,
+                            appKey: appkey || '',
+                            transactionName: requestID,
+                            transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME as string,
+                            uniqueClientId: uuid
+                        }, findHeader.beaconProperties);
 
+                    } else {
+                        global.txn = new Transaction({
+                            version: process.env.AWS_LAMBDA_FUNCTION_VERSION as string,
+                            appKey: appkey || '',
+                            transactionName: requestID,
+                            transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME as string,
+                            uniqueClientId: uuid
+                        });
+                    }
                 } else {
-                    global.txn = new Transaction({
-                        version: process.env.AWS_LAMBDA_FUNCTION_VERSION as string,
-                        appKey: appkey || '',
-                        transactionName: requestID,
-                        transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME as string,
-                        uniqueClientId: uuid
-                    });
+                    Logger.warn('Appdynamics::Warn::Appdynamics instrumentation is not enabled.');
                 }
-
 
                 Logger.debug('Staring Transaction');
 
