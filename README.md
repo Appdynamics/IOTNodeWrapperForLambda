@@ -44,14 +44,14 @@ export { myhandler }
 ```
 APPDYNAMICS_ENABLED
 ```
+set value to "true" to enable the agent or "false" to disable the agent
 
 5.  Add the following enivronment/stage variable in lambda
 
 ```
 APPDYNAMICS_APPKEY
 ```
-
-set value to "true" to enable the agent or "false" to disable the agent
+set value to the appKey for your installation
 
 *Note these can be set at environement or stageVariable level.  The environment Variable takes precedence.
 
