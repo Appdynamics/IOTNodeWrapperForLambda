@@ -161,32 +161,34 @@ class AppAgent {
                 }
                 if (callbackExists) {
                     var newcallback = function () {
-                        Logger.info(`Stopping ${global.txn.config.transactionName}:${global.txn.config.transactionType}`);
+                        if (instrumentationenabled) {
+                            Logger.info(`Stopping ${global.txn.config.transactionName}:${global.txn.config.transactionType}`);
 
-                        // 
-                        if (global.txn) {
-                            global.txn.stop();
-                        }
-
-                        if (arguments && arguments[0]) {
+                            // 
                             if (global.txn) {
-                                // Lambda Transaction error
-                                global.txn.reportError({
-                                    name: 'Lambda Execution Error',
-                                    message: JSON.stringify(arguments[0])
-                                });
+                                global.txn.stop();
                             }
 
-                        } else if (arguments && arguments[1]) {
-                            var res = arguments[1]
-                            //Normal Error status codes
-                            if (res.statusCode && (res.statusCode >= 400 && res.statusCode < 600)) {
-                                var body: string = (res.body) ? res.body : JSON.stringify(res);
+                            if (arguments && arguments[0]) {
                                 if (global.txn) {
+                                    // Lambda Transaction error
                                     global.txn.reportError({
-                                        name: res.statusCode.toString(),
-                                        message: body as string
+                                        name: 'Lambda Execution Error',
+                                        message: JSON.stringify(arguments[0])
                                     });
+                                }
+
+                            } else if (arguments && arguments[1]) {
+                                var res = arguments[1]
+                                //Normal Error status codes
+                                if (res.statusCode && (res.statusCode >= 400 && res.statusCode < 600)) {
+                                    var body: string = (res.body) ? res.body : JSON.stringify(res);
+                                    if (global.txn) {
+                                        global.txn.reportError({
+                                            name: res.statusCode.toString(),
+                                            message: body as string
+                                        });
+                                    }
                                 }
                             }
                         }
