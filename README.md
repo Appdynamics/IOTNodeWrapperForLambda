@@ -13,19 +13,21 @@ NPM
 
 A step by step to quick get up and running 
 
-1. add appdynamics lib to labmda function folder
+1. add appdynamics lib to your lambda
 
-**Note** see Building Package below on how to build the appdynamics lib
+```
+npm install git+https://github.com/Appdynamics/IOT-Node-Wrapper-for-Lambda.git
+```
 
 2. Import AppAgent.ts Transaction at top of each handler function
 
 ```
-import { AppAgent } from './appdynamics/AppAgent'
+import { AppAgent } from '@appdynamicsnodelambda/nodelambda/appdynamics/AppAgent'
 ```
 
 3.  Initialize the AppAgent at end of your handler by passing in the handler function
 ```
-import { AppAgent } from './appdynamics/AppAgent'
+import { AppAgent } from '@appdynamicsnodelambda/nodelambda/appdynamics/AppAgent'
 
 var myhandler =  (event: any, context: any, callback: any) => {
     callback(null, 'success');
@@ -37,28 +39,23 @@ myhandler = AppAgent.init(myhandler, {
 });
 export { myhandler }
 ```
-4.  Add the following enivronment variable in lambda
+4.  Add the following enivronment/stage variable in lambda
 
 ```
 APPDYNAMICS_ENABLED
 ```
 
+5.  Add the following enivronment/stage variable in lambda
+
+```
+APPDYNAMICS_APPKEY
+```
+
 set value to "true" to enable the agent or "false" to disable the agent
 
+*Note these can be set at environement or stageVariable level.  The environment Variable takes precedence.
 
 
-### Building Package
-
-For initial setup run the folloiwng command
-```
-npm install
-```
-
-
-To generate appdynamics module folder run 
-```
-tsc
-```
 
 ### Custom data
 
@@ -96,6 +93,10 @@ Example usage:
         });
     }
 ```
+
+### Logging
+APPDYNAMICS_LOGLEVEL can be added at the environment or stage level to enable logging
+
 
 ## Authors
 
