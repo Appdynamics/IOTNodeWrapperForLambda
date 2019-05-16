@@ -14,12 +14,14 @@ class AppAgent {
             console.log('Appdynamics::Info::Appdynamics instrumentation is not enabled.');
             return func;
         }
-        if (process.env.loglevel) {
-            Logger_1.Logger.init(process.env.loglevel);
+        var loglevel = 'OFF';
+        if (config.loglevel) {
+            loglevel = config.loglevel;
         }
-        else {
-            Logger_1.Logger.init(config.loglevel || "ERROR");
+        else if (process.env.APPDYNAMICS_LOGLEVEL) {
+            loglevel = process.env.APPDYNAMICS_LOGLEVEL;
         }
+        Logger_1.Logger.init(loglevel);
         function isFunction(functionToCheck) {
             var string2check = {}.toString.call(functionToCheck);
             return functionToCheck && (string2check === '[object Function]' || string2check === '[object AsyncFunction]');
@@ -30,6 +32,11 @@ class AppAgent {
             Logger_1.Logger.info(`Instrumenting ${func.name}`);
             var old = func;
             newfunc = function (event, context, callback) {
+                if (event.stageVariables && event.stageVariables.APPDYNAMICS_LOGLEVEL) {
+                    Logger_1.Logger.debug('loglevel in Stage Var.');
+                    var loglevel = event.APPDYNAMICS_LOGLEVEL;
+                    Logger_1.Logger.init(loglevel);
+                }
                 Logger_1.Logger.debug(`Intrumenting func: ${func}`);
                 var uuid;
                 var contextExists = true;
@@ -57,13 +64,13 @@ class AppAgent {
                     Logger_1.Logger.debug('appKey in config.');
                     appkey = config.appKey;
                 }
-                else if (process.env.appKey) {
+                else if (process.env.APPDYNAMICS_APPKEY) {
                     Logger_1.Logger.debug('appKey in Environment.');
-                    appkey = process.env.appKey;
+                    appkey = process.env.APPDYNAMICS_APPKEY;
                 }
-                else if (event.stageVariables && event.stageVariables.appKey) {
+                else if (event.stageVariables && event.stageVariables.APPDYNAMICS_APPKEY) {
                     Logger_1.Logger.debug('appKey in Stage Var.');
-                    appkey = event.appKey;
+                    appkey = event.APPDYNAMICS_APPKEY;
                 }
                 else {
                     Logger_1.Logger.error('No appKey found');

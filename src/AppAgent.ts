@@ -6,184 +6,196 @@ import { Logger } from "./Helpers/Logger";
 import { HelperMethods } from "./Helpers/HelperMethods";
 class AppAgent {
     static init(func: any, config?: AppConfig) {
-        if(!config) {
+        if (!config) {
             config = {} as AppConfig;
         }
         if (!(process.env.APPDYNAMICS_ENABLED && process.env.APPDYNAMICS_ENABLED === "true")) {
             console.log('Appdynamics::Info::Appdynamics instrumentation is not enabled.')
             return func;
         }
-        if(process.env.loglevel) {
-            Logger.init(process.env.loglevel);
-        } else {
-            Logger.init(config.loglevel || "ERROR");
+
+        var loglevel = 'OFF';
+        if (config.loglevel) {
+            loglevel = config.loglevel;
+        } else if (process.env.APPDYNAMICS_LOGLEVEL) {
+            loglevel = process.env.APPDYNAMICS_LOGLEVEL;
         }
+        Logger.init(loglevel);
+
 
 
         function isFunction(functionToCheck: any) {
             var string2check = {}.toString.call(functionToCheck);
             return functionToCheck && (string2check === '[object Function]' || string2check === '[object AsyncFunction]');
         }
-            var newfunc = undefined;
+        var newfunc = undefined;
 
-            Logger.info(`Potential function: ${func.name}`)
-            if (isFunction(func)) {
-                Logger.info(`Instrumenting ${func.name}`)
-                var old = func;
-                    newfunc = function (event: any, context: any, callback: any) {
-                    Logger.debug(`Intrumenting func: ${func}`);
-                    var uuid;
-                    var contextExists: boolean = true;
-                    var callbackExists: boolean = true;
-                    var requestID = '';
-                    if (!context) {
-                        Logger.warn('context not given in function, generating uuid');
-                        contextExists = false;
-                        requestID = (new Date()).getTime().toString();
-                    } else {
-                        requestID = context.awsRequestId;
-                    }
-                    if (config && config.uniqueIDHeader && event.headers && event.headers[config.uniqueIDHeader]) {
-                        uuid = event.headers[config.uniqueIDHeader];
-                    }
-                    Logger.debug('Creating transaction');
-                    global.AppConfig = config || {};
-                    if(!config) {
-                        config = {};
-                    }
-                    var findHeader = HelperMethods.findEventHeaderInformation(event);
-                    var appkey = '<NO KEY SET>';
-                    if (config.appKey) {
-                        Logger.debug('appKey in config.');
-                        appkey = config.appKey;
-                    } else if (process.env.appKey) {
-                        Logger.debug('appKey in Environment.');
-                        appkey = process.env.appKey;
-                    } else if (event.stageVariables && event.stageVariables.appKey) {
-                        Logger.debug('appKey in Stage Var.');
-                        appkey = event.appKey;
-                    } else {
-                        Logger.error('No appKey found');
-                    }
-                    Logger.debug(appkey);
-                    if (findHeader.headersFound) {
-                        global.txn = new Transaction({
-                            version: process.env.AWS_LAMBDA_FUNCTION_VERSION as string,
-                            appKey: appkey || '',
-                            transactionName: requestID,
-                            transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME as string,
-                            uniqueClientId: uuid
-                        }, findHeader.beaconProperties);
+        Logger.info(`Potential function: ${func.name}`)
+        if (isFunction(func)) {
+            Logger.info(`Instrumenting ${func.name}`)
+            var old = func;
+            newfunc = function (event: any, context: any, callback: any) {
+                if (event.stageVariables && event.stageVariables.APPDYNAMICS_LOGLEVEL) {
+                    Logger.debug('loglevel in Stage Var.');
+                    var loglevel = event.APPDYNAMICS_LOGLEVEL;
+                    Logger.init(loglevel);
+                }
 
-                    } else {
-                        global.txn = new Transaction({
-                            version: process.env.AWS_LAMBDA_FUNCTION_VERSION as string,
-                            appKey: appkey || '',
-                            transactionName: requestID,
-                            transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME as string,
-                            uniqueClientId: uuid
-                        });
-                    }
+                Logger.debug(`Intrumenting func: ${func}`);
+                var uuid;
+                var contextExists: boolean = true;
+                var callbackExists: boolean = true;
+                var requestID = '';
+                if (!context) {
+                    Logger.warn('context not given in function, generating uuid');
+                    contextExists = false;
+                    requestID = (new Date()).getTime().toString();
+                } else {
+                    requestID = context.awsRequestId;
+                }
+                if (config && config.uniqueIDHeader && event.headers && event.headers[config.uniqueIDHeader]) {
+                    uuid = event.headers[config.uniqueIDHeader];
+                }
+                Logger.debug('Creating transaction');
+                global.AppConfig = config || {};
+                if (!config) {
+                    config = {};
+                }
+                var findHeader = HelperMethods.findEventHeaderInformation(event);
+                var appkey = '<NO KEY SET>';
+                if (config.appKey) {
+                    Logger.debug('appKey in config.');
+                    appkey = config.appKey;
+                } else if (process.env.APPDYNAMICS_APPKEY) {
+                    Logger.debug('appKey in Environment.');
+                    appkey = process.env.APPDYNAMICS_APPKEY;
+                } else if (event.stageVariables && event.stageVariables.APPDYNAMICS_APPKEY) {
+                    Logger.debug('appKey in Stage Var.');
+                    appkey = event.APPDYNAMICS_APPKEY;
+                } else {
+                    Logger.error('No appKey found');
+                }
 
 
-                    Logger.debug('Staring Transaction');
+                Logger.debug(appkey);
+                if (findHeader.headersFound) {
+                    global.txn = new Transaction({
+                        version: process.env.AWS_LAMBDA_FUNCTION_VERSION as string,
+                        appKey: appkey || '',
+                        transactionName: requestID,
+                        transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME as string,
+                        uniqueClientId: uuid
+                    }, findHeader.beaconProperties);
 
-                    if (!callback) {
-                        Logger.warn('callback not given in function, have to stop txn in process.exit synchronously');
-                        callbackExists = false;
-                        //Cleanup
-
-
-                    };
-                    process.once('beforeExit', function () {
-                        //if the transaction hasn't been stopped (like in an exception) send the data
-                        if (global.txn && global.txn.iot && global.txn.timer && !global.txn.timer.end_process_time) {
-                            Logger.info(`Stopping ${global.txn.config.transactionName}:${global.txn.config.transactionType}`);
-                            Logger.info('Process about to exit');
-                            try {
-                                global.txn.stop();
-                            } catch (err) {
-                                //eat any errors for graceful exit
-                                Logger.error(err.message)
-                            }
-
-                        }
+                } else {
+                    global.txn = new Transaction({
+                        version: process.env.AWS_LAMBDA_FUNCTION_VERSION as string,
+                        appKey: appkey || '',
+                        transactionName: requestID,
+                        transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME as string,
+                        uniqueClientId: uuid
                     });
-                    process.removeAllListeners('uncaughtException');
-                    var reportExceptionToAppDynamics = function (err: any) {
-                        if (global.txn && global.txn.iot) {
-                            //global.txn.iot.sync = true;
-                        }
-                        if (global.txn) {
+                }
 
-                            //Connection issues, dont wan't to end up in loop of beacons stop gracefully
-                            if (err.message === "ECONNRESET") {
-                                Logger.warn("Potential Communication issue.  Stopping communication to AppDynamics Collector for graceful shutdown.")
-                                process.exit(1);
-                            }
-                            global.txn.reportError({ name: "UnCaughtExceptions", message: JSON.stringify(err) });
+
+                Logger.debug('Staring Transaction');
+
+                if (!callback) {
+                    Logger.warn('callback not given in function, have to stop txn in process.exit synchronously');
+                    callbackExists = false;
+                    //Cleanup
+
+
+                };
+                process.once('beforeExit', function () {
+                    //if the transaction hasn't been stopped (like in an exception) send the data
+                    if (global.txn && global.txn.iot && global.txn.timer && !global.txn.timer.end_process_time) {
+                        Logger.info(`Stopping ${global.txn.config.transactionName}:${global.txn.config.transactionType}`);
+                        Logger.info('Process about to exit');
+                        try {
                             global.txn.stop();
-
-                            Logger.info(`Stopping ${global.txn.config.transactionName}:${global.txn.config.transactionType}`);
-
+                        } catch (err) {
+                            //eat any errors for graceful exit
+                            Logger.error(err.message)
                         }
 
-                        process.exit(1);
-                    };
+                    }
+                });
+                process.removeAllListeners('uncaughtException');
+                var reportExceptionToAppDynamics = function (err: any) {
+                    if (global.txn && global.txn.iot) {
+                        //global.txn.iot.sync = true;
+                    }
+                    if (global.txn) {
 
-                    var reportRejectionToAppDynamics = function (reason: any, promise: any) {
+                        //Connection issues, dont wan't to end up in loop of beacons stop gracefully
+                        if (err.message === "ECONNRESET") {
+                            Logger.warn("Potential Communication issue.  Stopping communication to AppDynamics Collector for graceful shutdown.")
+                            process.exit(1);
+                        }
+                        global.txn.reportError({ name: "UnCaughtExceptions", message: JSON.stringify(err) });
+                        global.txn.stop();
+
+                        Logger.info(`Stopping ${global.txn.config.transactionName}:${global.txn.config.transactionType}`);
+
+                    }
+
+                    process.exit(1);
+                };
+
+                var reportRejectionToAppDynamics = function (reason: any, promise: any) {
+                    if (global.txn) {
+
+                        global.txn.reportError({ name: "UnHandledRejection", message: JSON.stringify(reason) });
+                    }
+                };
+                process.on('uncaughtException', reportExceptionToAppDynamics);
+                process.on('unhandledRejection', reportRejectionToAppDynamics);
+                if (callbackExists) {
+                    var newcallback = function () {
+                        Logger.info(`Stopping ${global.txn.config.transactionName}:${global.txn.config.transactionType}`);
+
+                        // 
                         if (global.txn) {
-
-                            global.txn.reportError({ name: "UnHandledRejection", message: JSON.stringify(reason) });
+                            global.txn.stop();
                         }
-                    };
-                    process.on('uncaughtException', reportExceptionToAppDynamics);
-                    process.on('unhandledRejection', reportRejectionToAppDynamics);
-                    if (callbackExists) {
-                        var newcallback = function () {
-                            Logger.info(`Stopping ${global.txn.config.transactionName}:${global.txn.config.transactionType}`);
 
-                            // 
+                        if (arguments && arguments[0]) {
                             if (global.txn) {
-                                global.txn.stop();
+                                // Lambda Transaction error
+                                global.txn.reportError({
+                                    name: 'Lambda Execution Error',
+                                    message: JSON.stringify(arguments[0])
+                                });
                             }
 
-                            if (arguments && arguments[0]) {
+                        } else if (arguments && arguments[1]) {
+                            var res = arguments[1]
+                            //Normal Error status codes
+                            if (res.statusCode && (res.statusCode >= 400 && res.statusCode < 600)) {
+                                var body: string = (res.body) ? res.body : JSON.stringify(res);
                                 if (global.txn) {
-                                    // Lambda Transaction error
                                     global.txn.reportError({
-                                        name: 'Lambda Execution Error',
-                                        message: JSON.stringify(arguments[0])
+                                        name: res.statusCode.toString(),
+                                        message: body as string
                                     });
                                 }
-
-                            } else if (arguments && arguments[1]) {
-                                var res = arguments[1]
-                                //Normal Error status codes
-                                if (res.statusCode && (res.statusCode >= 400 && res.statusCode < 600)) {
-                                    var body: string = (res.body) ? res.body : JSON.stringify(res);
-                                    if (global.txn) {
-                                        global.txn.reportError({
-                                            name: res.statusCode.toString(),
-                                            message: body as string
-                                        });
-                                    }
-                                }
                             }
-                            if (callback) {
-                                callback.apply(null, arguments as IArguments);
-                            }
-
                         }
-                        old(event, context, newcallback);
+                        if (callback) {
+                            callback.apply(null, arguments as IArguments);
+                        }
 
-                    } else {
-                        old(event, context);
                     }
+                    old(event, context, newcallback);
 
+                } else {
+                    old(event, context);
                 }
+
             }
-        
+        }
+
         try {
 
 
@@ -206,10 +218,10 @@ class AppAgent {
             Logger.error('Interceptors failed to load');
         }
 
-        if(newfunc) {
+        if (newfunc) {
             return newfunc;
         } else {
-             return func;
+            return func;
         }
 
         //return new;
