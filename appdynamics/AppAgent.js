@@ -69,6 +69,7 @@ class AppAgent {
                     config = {};
                 }
                 var findHeader = HelperMethods_1.HelperMethods.findEventHeaderInformation(event);
+                var findEventData = HelperMethods_1.HelperMethods.findEventDataInformation(event, findHeader.beaconProperties, config.eventData);
                 var appkey = '<NO KEY SET>';
                 if (config.appKey) {
                     Logger_1.Logger.debug('appKey in config.');
@@ -88,7 +89,16 @@ class AppAgent {
                 Logger_1.Logger.debug(appkey);
                 var instrumentationenabled = true;
                 if ((process.env.APPDYNAMICS_ENABLED && process.env.APPDYNAMICS_ENABLED === "true") || (!processenvironmentset_enabled && event.stageVariables && event.stageVariables.APPDYNAMICS_ENABLED === "true")) {
-                    if (findHeader.headersFound) {
+                    if (findEventData.eventDataFound) {
+                        global.txn = new Transaction_1.Transaction({
+                            version: process.env.AWS_LAMBDA_FUNCTION_VERSION,
+                            appKey: appkey || '',
+                            transactionName: requestID,
+                            transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME,
+                            uniqueClientId: uuid
+                        }, findEventData.beaconProperties);
+                    }
+                    else if (findHeader.headersFound) {
                         global.txn = new Transaction_1.Transaction({
                             version: process.env.AWS_LAMBDA_FUNCTION_VERSION,
                             appKey: appkey || '',
@@ -203,15 +213,7 @@ class AppAgent {
         try {
             //INIT interceptors
             HTTPInterceptor_1.HTTPInterceptor.init();
-            var show = {};
-            var hide = {};
-            if (config.paramsToHide) {
-                hide = config.paramsToHide;
-            }
-            if (config.paramsToShow) {
-                show = config.paramsToShow;
-            }
-            AWSInterceptor_1.AWSInterceptor.init(show, hide);
+            AWSInterceptor_1.AWSInterceptor.init(config.AWSData);
         }
         catch (err) {
             Logger_1.Logger.error('Interceptors failed to load');

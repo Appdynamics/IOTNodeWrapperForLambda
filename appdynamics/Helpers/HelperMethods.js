@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const index_1 = require("../index");
 const Logger_1 = require("./Logger");
 class HelperMethods {
     static isValid(obj, prop) {
@@ -15,18 +16,77 @@ class HelperMethods {
         }
         return obj;
     }
+    static findEventDataInformation(event, BeaconProperties, configMap) {
+        var eventDataFound = false;
+        if (configMap) {
+            for (var dataKey in configMap) {
+                if (event && event[dataKey]) {
+                    eventDataFound = true;
+                    Logger_1.Logger.debug(`Found Event Data for : ${dataKey}`);
+                    var datatype = configMap[dataKey];
+                    switch (datatype) {
+                        case index_1.DataType.STRING:
+                            if (BeaconProperties.stringProperties)
+                                BeaconProperties.stringProperties[dataKey.toLowerCase() + "_evt"] = event[dataKey];
+                            break;
+                        case index_1.DataType.DATETIME:
+                            if (BeaconProperties.datetimeProperties)
+                                BeaconProperties.datetimeProperties[dataKey.toLowerCase() + "_evt"] = new Date(event[dataKey]).getTime();
+                            break;
+                        case index_1.DataType.BOOLEAN:
+                            if (BeaconProperties.booleanProperties)
+                                BeaconProperties.booleanProperties[dataKey.toLowerCase() + "_evt"] = event[dataKey];
+                            break;
+                        case index_1.DataType.DOUBLE:
+                            if (BeaconProperties.doubleProperties)
+                                BeaconProperties.doubleProperties[dataKey.toLowerCase() + "_evt"] = event[dataKey];
+                            break;
+                        default:
+                            Logger_1.Logger.warn(`DataType "${datatype}" is not a valid datatype`);
+                            break;
+                    }
+                }
+            }
+        }
+        return {
+            eventDataFound: eventDataFound,
+            beaconProperties: BeaconProperties
+        };
+    }
     static goThroughHeaders(res, append, configMap) {
         var headersFound = false;
         var BeaconProperties = {
-            stringProperties: {}
+            stringProperties: {},
+            booleanProperties: {},
+            doubleProperties: {},
+            datetimeProperties: {}
         };
         if (configMap) {
             for (var headerKey in configMap) {
                 if (res.headers && res.headers[headerKey]) {
                     headersFound = true;
                     Logger_1.Logger.debug(`Found header: ${headerKey}`);
-                    if (BeaconProperties && BeaconProperties.stringProperties) {
-                        BeaconProperties.stringProperties[headerKey.toLowerCase() + append] = res.headers[headerKey];
+                    var datatype = configMap[headerKey];
+                    switch (datatype) {
+                        case index_1.DataType.STRING:
+                            if (BeaconProperties.stringProperties)
+                                BeaconProperties.stringProperties[headerKey.toLowerCase() + append] = res.headers[headerKey];
+                            break;
+                        case index_1.DataType.DATETIME:
+                            if (BeaconProperties.datetimeProperties)
+                                BeaconProperties.datetimeProperties[headerKey.toLowerCase() + append] = new Date(res.headers[headerKey]).getTime();
+                            break;
+                        case index_1.DataType.BOOLEAN:
+                            if (BeaconProperties.booleanProperties)
+                                BeaconProperties.booleanProperties[headerKey.toLowerCase() + append] = res.headers[headerKey];
+                            break;
+                        case index_1.DataType.DOUBLE:
+                            if (BeaconProperties.doubleProperties)
+                                BeaconProperties.doubleProperties[headerKey.toLowerCase() + append] = res.headers[headerKey];
+                            break;
+                        default:
+                            Logger_1.Logger.warn(`DataType "${datatype}" is not a valid datatype`);
+                            break;
                     }
                 }
             }
@@ -45,6 +105,20 @@ class HelperMethods {
     static findRequestHeaderInformation(req) {
         return HelperMethods.goThroughHeaders(req, '_req', global.AppConfig.requestHeaders);
     }
+    // static findEventDataInformation(event, properties: string[]) {
+    //     if (properties) {
+    //         for (let prop in properties) {
+    //             if (responseHeaders[key]) {
+    //                 responseHeaders[key].push(headers[key]);
+    //             } else {
+    //                 responseHeaders[key] = [headers[key]];
+    //             }
+    //         }
+    //         return responseHeaders;
+    //     } else {
+    //         return undefined;
+    //     }
+    // }
     static formatResponseHeaders(headers) {
         var responseHeaders = {};
         if (headers) {
@@ -71,6 +145,19 @@ class HelperMethods {
             }
         }
         return map1;
+    }
+    static mergeBeaconProperties(beaconprop1, beaconprop2) {
+        var BeaconProperties = {
+            stringProperties: {},
+            booleanProperties: {},
+            doubleProperties: {},
+            datetimeProperties: {}
+        };
+        BeaconProperties.stringProperties = Object.assign({}, beaconprop1.stringProperties, beaconprop2.stringProperties);
+        BeaconProperties.booleanProperties = Object.assign({}, beaconprop1.booleanProperties, beaconprop2.booleanProperties);
+        BeaconProperties.doubleProperties = Object.assign({}, beaconprop1.doubleProperties, beaconprop2.doubleProperties);
+        BeaconProperties.datetimeProperties = Object.assign({}, beaconprop1.datetimeProperties, beaconprop2.datetimeProperties);
+        return BeaconProperties;
     }
     static setPropertiesOnEvent(event, properties) {
         if (properties) {

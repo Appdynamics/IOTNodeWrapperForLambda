@@ -1,7 +1,7 @@
-import { BooleanMap } from '../index';
+import { DataTypeMap } from '../index';
 declare class AWSInterceptor {
-    static defaultParams: BooleanMap;
-    static setProperties(srcproperties: BooleanMap, newprop: BooleanMap): BooleanMap;
-    static init(paramsToLookFor: BooleanMap, paramsToAvoid: BooleanMap): void;
+    static defaultParams: DataTypeMap;
+    static setProperties(srcproperties: DataTypeMap, newprop: DataTypeMap): DataTypeMap;
+    static init(awsData?: DataTypeMap): void;
 }
 export { AWSInterceptor };

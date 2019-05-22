@@ -46,6 +46,9 @@ export interface BooleanMap {
 export interface NumberMap {
     [propName: string]: number;
 }
+export interface DataTypeMap {
+    [propeName: string]: DataType;
+}
 export interface ExitCallMap {
     [propName: string]: ExitCall;
 }
@@ -99,6 +102,12 @@ export interface StackFrame {
     imageOffset?: number;
     symbolOffset?: number;
 }
+export declare enum DataType {
+    STRING = "string",
+    DATETIME = "datetime",
+    BOOLEAN = "boolean",
+    DOUBLE = "double"
+}
 declare enum Runtime {
     NATIVE = "native",
     JAVA = "java",
@@ -127,11 +136,11 @@ export interface AppConfig {
     appKey?: string;
     uniqueIDHeader?: string;
     loglevel?: string;
-    paramsToShow?: BooleanMap;
-    paramsToHide?: BooleanMap;
-    lambdaHeaders?: BooleanMap;
-    requestHeaders?: BooleanMap;
-    responseHeaders?: BooleanMap;
+    lambdaHeaders?: DataTypeMap;
+    requestHeaders?: DataTypeMap;
+    responseHeaders?: DataTypeMap;
+    eventData?: DataTypeMap;
+    AWSData?: DataTypeMap;
 }
 export declare enum LOGLEVEL {
     DEBUG = 0,

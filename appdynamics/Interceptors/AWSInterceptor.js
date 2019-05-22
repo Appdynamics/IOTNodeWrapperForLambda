@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
 const Logger_1 = require("../Helpers/Logger");
+const index_1 = require("../index");
 const HelperMethods_1 = require("../Helpers/HelperMethods");
 class AWSInterceptor {
     static setProperties(srcproperties, newprop) {
@@ -15,11 +16,10 @@ class AWSInterceptor {
         }
         return srcproperties;
     }
-    static init(paramsToLookFor, paramsToAvoid) {
+    static init(awsData) {
         var validParams = true;
         try {
-            var finalParamMap = this.setProperties(this.defaultParams, paramsToLookFor);
-            finalParamMap = this.setProperties(finalParamMap, paramsToAvoid);
+            var finalParamMap = this.setProperties(this.defaultParams, awsData);
         }
         catch (err) {
             Logger_1.Logger.error('Problems Setting up Params to monitor');
@@ -37,7 +37,7 @@ class AWSInterceptor {
                     }
                     if (validParams && req && req.params) {
                         for (var key in req.params) {
-                            if (finalParamMap && finalParamMap[key]) {
+                            if (finalParamMap && !!finalParamMap[key]) {
                                 var strparam = typeof req.params[key] === "string" ? req.params[key] : JSON.stringify(req.params[key]);
                                 stringProperties[key] = strparam;
                             }
@@ -84,17 +84,17 @@ class AWSInterceptor {
     }
 }
 AWSInterceptor.defaultParams = {
-    TopicArn: true,
-    TableName: true,
-    StreamName: true,
-    FunctionName: true,
-    QueueName: true,
-    billingGroupArn: true,
-    billingGroupName: true,
-    thingGroupArn: true,
-    thingGroupName: true,
-    thingName: true,
-    policyName: true,
-    jobId: true //IOT
+    TopicArn: index_1.DataType.STRING,
+    TableName: index_1.DataType.STRING,
+    StreamName: index_1.DataType.STRING,
+    FunctionName: index_1.DataType.STRING,
+    QueueName: index_1.DataType.STRING,
+    billingGroupArn: index_1.DataType.STRING,
+    billingGroupName: index_1.DataType.STRING,
+    thingGroupArn: index_1.DataType.STRING,
+    thingGroupName: index_1.DataType.STRING,
+    thingName: index_1.DataType.STRING,
+    policyName: index_1.DataType.STRING,
+    jobId: index_1.DataType.STRING //IOT
 };
 exports.AWSInterceptor = AWSInterceptor;

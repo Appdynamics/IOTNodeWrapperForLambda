@@ -2,40 +2,39 @@ const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-depe
 import { Logger } from '../Helpers/Logger'
 import { TextEncoder } from 'util';
 import { ExitCall } from '../IOTWrapper/ExitCall';
-import { StringMap, BooleanMap } from '../index'
+import { StringMap, BooleanMap, DataTypeMap, DataType } from '../index'
 import { HelperMethods } from '../Helpers/HelperMethods';
 class AWSInterceptor {
-    static defaultParams: BooleanMap = {
-        TopicArn: true, //SNS
-        TableName: true, //Dynamo
-        StreamName: true, //Kinesis
-        FunctionName: true, //Lambda
-        QueueName: true, //SQS
-        billingGroupArn: true, //IOT
-        billingGroupName: true, //IOT
-        thingGroupArn: true, //IOT
-        thingGroupName: true, //IOT
-        thingName: true, //IOT
-        policyName: true, //IOT
-        jobId: true //IOT
+    static defaultParams: DataTypeMap = {
+        TopicArn: DataType.STRING, //SNS
+        TableName: DataType.STRING, //Dynamo
+        StreamName: DataType.STRING, //Kinesis
+        FunctionName: DataType.STRING, //Lambda
+        QueueName: DataType.STRING, //SQS
+        billingGroupArn: DataType.STRING, //IOT
+        billingGroupName: DataType.STRING, //IOT
+        thingGroupArn: DataType.STRING, //IOT
+        thingGroupName: DataType.STRING, //IOT
+        thingName: DataType.STRING, //IOT
+        policyName: DataType.STRING, //IOT
+        jobId: DataType.STRING //IOT
     }
 
-    static setProperties(srcproperties: BooleanMap, newprop: BooleanMap): BooleanMap {
+    static setProperties(srcproperties: DataTypeMap, newprop: DataTypeMap): DataTypeMap {
         if (!srcproperties) {
             srcproperties = {}
         }
         if (newprop) {
             for (let key in newprop) {
-                srcproperties[key] = newprop[key] as boolean;
+                srcproperties[key] = newprop[key];
             }
         }
         return srcproperties
     }
-    static init(paramsToLookFor: BooleanMap, paramsToAvoid: BooleanMap) {
+    static init(awsData?:DataTypeMap) {
         var validParams = true;
         try {
-            var finalParamMap = this.setProperties(this.defaultParams, paramsToLookFor);
-            finalParamMap = this.setProperties(finalParamMap, paramsToAvoid);
+            var finalParamMap = this.setProperties(this.defaultParams, awsData as DataTypeMap);
         } catch (err) {
             Logger.error('Problems Setting up Params to monitor')
             validParams = false;
@@ -53,7 +52,8 @@ class AWSInterceptor {
                     }
                     if (validParams && req && req.params) {
                         for (var key in req.params) {
-                            if (finalParamMap && finalParamMap[key]) {
+
+                            if (finalParamMap && !!finalParamMap[key]) {
                                 var strparam = typeof req.params[key] === "string" ? req.params[key] : JSON.stringify(req.params[key]);
                                 stringProperties[key] = strparam;
                             }
