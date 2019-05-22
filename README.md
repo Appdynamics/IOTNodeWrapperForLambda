@@ -34,7 +34,7 @@ var myhandler =  (event: any, context: any, callback: any) => {
 }
 myhandler = AppAgent.init(myhandler, {
     lambdaHeaders: {
-        "headertolookfor":true
+        "headertolookfor":DataType.STRING
     }
 });
 export { myhandler }
