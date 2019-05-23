@@ -1,4 +1,4 @@
-import { StringMap, NetworkRequestEvent, CustomEvent, BeaconProperties, ResponseHeaders, ErrorEvent, BooleanMap } from "../index"
+import { DataTypeMap, DataType, StringMap, NetworkRequestEvent, CustomEvent, BeaconProperties, ResponseHeaders, ErrorEvent, BooleanMap } from "../index"
 import { Logger } from "./Logger";
 class HelperMethods {
     static isValid(obj: any, prop: string) {
@@ -14,19 +14,82 @@ class HelperMethods {
         }
         return obj;
     }
-    static goThroughHeaders(res: any, append: string,  configMap: BooleanMap): any {
+    static findEventDataInformation(event:any, BeaconProperties:BeaconProperties, configMap: DataTypeMap) {
+        var eventDataFound = false;
+        if (configMap) {
+            for (var dataKey in configMap) {
+                if (event && event[dataKey]) {
+                    eventDataFound = true;
+                    Logger.debug(`Found Event Data for : ${dataKey}`);
+                    var datatype: DataType = configMap[dataKey];
+                    switch (datatype) {
+                        case DataType.STRING:
+                            if (BeaconProperties.stringProperties)
+                                BeaconProperties.stringProperties[dataKey.toLowerCase() + "_evt"] = event[dataKey];
+                            break;
+                        case DataType.DATETIME:
+                            if (BeaconProperties.datetimeProperties)
+                                BeaconProperties.datetimeProperties[dataKey.toLowerCase() + "_evt"] = new Date(event[dataKey]).getTime();
+                            break;
+                        case DataType.BOOLEAN:
+                            if (BeaconProperties.booleanProperties)
+                                BeaconProperties.booleanProperties[dataKey.toLowerCase() + "_evt"] = event[dataKey];
+                            break;
+                        case DataType.DOUBLE:
+                            if (BeaconProperties.doubleProperties)
+                                BeaconProperties.doubleProperties[dataKey.toLowerCase() + "_evt"] = event[dataKey];
+                            break;
+                        default:
+                            Logger.warn(`DataType "${datatype}" is not a valid datatype`);
+                            break;
+                    }
+
+                }
+            }
+        }
+        return {
+            eventDataFound: eventDataFound,
+            beaconProperties: BeaconProperties
+
+        }
+    }
+    static goThroughHeaders(res: any, append: string, configMap: DataTypeMap): any {
         var headersFound = false;
         var BeaconProperties: BeaconProperties = {
-            stringProperties: {}
+            stringProperties: {},
+            booleanProperties: {},
+            doubleProperties: {},
+            datetimeProperties: {}
+
         };
         if (configMap) {
             for (var headerKey in configMap) {
                 if (res.headers && res.headers[headerKey]) {
                     headersFound = true;
                     Logger.debug(`Found header: ${headerKey}`);
-                    if (BeaconProperties && BeaconProperties.stringProperties) {
-                        BeaconProperties.stringProperties[headerKey.toLowerCase() + append] = res.headers[headerKey]
+                    var datatype: DataType = configMap[headerKey];
+                    switch (datatype) {
+                        case DataType.STRING:
+                            if (BeaconProperties.stringProperties)
+                                BeaconProperties.stringProperties[headerKey.toLowerCase() + append] = res.headers[headerKey];
+                            break;
+                        case DataType.DATETIME:
+                            if (BeaconProperties.datetimeProperties)
+                                BeaconProperties.datetimeProperties[headerKey.toLowerCase() + append] = new Date(res.headers[headerKey]).getTime();
+                            break;
+                        case DataType.BOOLEAN:
+                            if (BeaconProperties.booleanProperties)
+                                BeaconProperties.booleanProperties[headerKey.toLowerCase() + append] = res.headers[headerKey];
+                            break;
+                        case DataType.DOUBLE:
+                            if (BeaconProperties.doubleProperties)
+                                BeaconProperties.doubleProperties[headerKey.toLowerCase() + append] = res.headers[headerKey];
+                            break;
+                        default:
+                            Logger.warn(`DataType "${datatype}" is not a valid datatype`);
+                            break;
                     }
+
                 }
             }
         }
@@ -37,14 +100,37 @@ class HelperMethods {
         }
     }
     static findEventHeaderInformation(event: any): any {
-        return HelperMethods.goThroughHeaders(event, '_evt', global.AppConfig.lambdaHeaders as BooleanMap);
+
+        return HelperMethods.goThroughHeaders(event, '_evt', global.AppConfig.lambdaHeaders as DataTypeMap);
+
+
     }
     static findResponHeaderInformation(res: any): any {
-        return HelperMethods.goThroughHeaders(res, '_res',  global.AppConfig.responseHeaders as BooleanMap);
+
+        return HelperMethods.goThroughHeaders(res, '_res', global.AppConfig.responseHeaders as DataTypeMap);
+
     }
     static findRequestHeaderInformation(req: any): any {
-        return HelperMethods.goThroughHeaders(req,  '_req', global.AppConfig.requestHeaders as BooleanMap);
+
+        return HelperMethods.goThroughHeaders(req, '_req', global.AppConfig.requestHeaders as DataTypeMap);
+
     }
+    // static findEventDataInformation(event, properties: string[]) {
+
+    //     if (properties) {
+    //         for (let prop in properties) {
+    //             if (responseHeaders[key]) {
+    //                 responseHeaders[key].push(headers[key]);
+    //             } else {
+    //                 responseHeaders[key] = [headers[key]];
+    //             }
+    //         }
+    //         return responseHeaders;
+    //     } else {
+    //         return undefined;
+    //     }
+
+    // }
     static formatResponseHeaders(headers: StringMap) {
         var responseHeaders: ResponseHeaders = {};
 
@@ -72,32 +158,48 @@ class HelperMethods {
         }
         return map1;
     }
+
+    static mergeBeaconProperties(beaconprop1:BeaconProperties, beaconprop2:BeaconProperties) {
+        var BeaconProperties: BeaconProperties = {
+            stringProperties: {},
+            booleanProperties: {},
+            doubleProperties: {},
+            datetimeProperties: {}
+
+        };
+        BeaconProperties.stringProperties = {...beaconprop1.stringProperties, ...beaconprop2.stringProperties }
+        BeaconProperties.booleanProperties = {...beaconprop1.booleanProperties, ...beaconprop2.booleanProperties }
+        BeaconProperties.doubleProperties = {...beaconprop1.doubleProperties, ...beaconprop2.doubleProperties }
+        BeaconProperties.datetimeProperties = {...beaconprop1.datetimeProperties, ...beaconprop2.datetimeProperties }
+        
+        return BeaconProperties;
+    }
     static setPropertiesOnEvent(event: ErrorEvent | NetworkRequestEvent | CustomEvent, properties: BeaconProperties | undefined) {
         if (properties) {
             if (properties.stringProperties) {
                 if (event.stringProperties) {
-                    event.stringProperties = {...event.stringProperties, ...properties.stringProperties}
+                    event.stringProperties = { ...event.stringProperties, ...properties.stringProperties }
                 } else {
                     event.stringProperties = properties.stringProperties;
                 }
             }
             if (properties.doubleProperties) {
                 if (event.doubleProperties) {
-                    event.doubleProperties = {...event.doubleProperties, ...properties.doubleProperties}
+                    event.doubleProperties = { ...event.doubleProperties, ...properties.doubleProperties }
                 } else {
                     event.doubleProperties = properties.doubleProperties;
                 }
             }
             if (properties.booleanProperties) {
                 if (event.booleanProperties) {
-                    event.booleanProperties = {...event.booleanProperties, ...properties.booleanProperties}
+                    event.booleanProperties = { ...event.booleanProperties, ...properties.booleanProperties }
                 } else {
                     event.booleanProperties = properties.booleanProperties;
                 }
             }
             if (properties.datetimeProperties) {
                 if (event.datetimeProperties) {
-                    event.datetimeProperties = {...event.datetimeProperties, ...properties.datetimeProperties}
+                    event.datetimeProperties = { ...event.datetimeProperties, ...properties.datetimeProperties }
                 } else {
                     event.datetimeProperties = properties.datetimeProperties;
                 }

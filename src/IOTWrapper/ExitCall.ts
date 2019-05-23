@@ -1,4 +1,4 @@
-import { NetworkRequestEvent, ExitCallConfiguration, IOTBeacon, BeaconProperties, ErrorEvent, CustomEvent, StringMap, NetworkResponseProperties } from "../index"
+import { NetworkRequestEvent, ExitCallConfiguration, IOTBeacon, BeaconProperties, ErrorEvent, CustomEvent, StringMap, NetworkResponseProperties, DataTypeMap } from "../index"
 import { IOT } from "./IOT";
 import { Timer } from "./Timer";
 import { HelperMethods } from "../Helpers/HelperMethods";

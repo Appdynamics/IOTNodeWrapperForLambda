@@ -36,9 +36,13 @@ export interface Event {
 }
 export interface BeaconProperties {
     [key: string]: string | number | StringMap | undefined | BooleanMap | NumberMap | boolean;
+    /*A map of the string properties of this event. There cannot be more than 16 string properties per event. Entry keys have a max length of 24 characters. Entry values have a max length of 128 characters. Entry keys cannot contain the pipe character '|'. Valid Examples: { "username": "john.doe" }*/
     stringProperties?: StringMap;
+    /*A map of the boolean properties of this event. There cannot be more than 16 boolean properties per event. Entry keys have a max length of 24 characters. Entry keys cannot contain the pipe character '|'. Valid Examples: { "error": false }*/
     booleanProperties?: BooleanMap;
+    /*A map of the double properties of this event. There cannot be more than 16 double properties per event. Entry keys have a max length of 24 characters. Entry keys cannot contain the pipe character '|'. Valid Examples: { "Fahrenheit": 98.2 }*/
     doubleProperties?: NumberMap;
+    /*A map of the datetime properties of this event, in millisecond epoch time. There cannot be more than 16 datetime properties per event. Entry keys have a max length of 24 characters. Entry keys cannot contain the pipe character '|'. Valid Examples: { "bootTime": 1487119625012 }*/
     datetimeProperties?: NumberMap;
 }
 export interface StringMap {
@@ -52,6 +56,9 @@ export interface NumberMap {
     [propName: string]: number;
 }
 
+export interface DataTypeMap {
+    [propeName: string]: DataType;
+}
 export interface ExitCallMap {
     [propName: string]: ExitCall;
 }
@@ -109,6 +116,13 @@ export interface StackFrame {
     imageOffset?: number;
     symbolOffset?: number;
 }
+export enum DataType {
+    STRING = "string",
+    DATETIME = "datetime",
+    BOOLEAN = "boolean",
+    DOUBLE = "double"
+
+}
 declare enum Runtime {
     NATIVE = "native",
     JAVA = "java",
@@ -135,16 +149,24 @@ export interface TransactionConfiguration {
     lambdaHeaders?: StringMap;
 }
 
-export interface AppConfig {
-    appKey?: string;
-    uniqueIDHeader?: string;
-    loglevel?: string;
-    paramsToShow?: BooleanMap;
-    paramsToHide?: BooleanMap;
-    lambdaHeaders?: BooleanMap;
-    requestHeaders?: BooleanMap;
-    responseHeaders?: BooleanMap;
 
+export interface AppConfig {
+    /*App Key to IOT Application in AppDynamics*/
+    appKey?: string;
+    /*Optional key that will look at the event.headers for a uniqueid.  If none given, datetime.now() is used as a uniquekey */
+    uniqueIDHeader?: string;
+    /*String of which log level reporting to be done*/
+    loglevel?: string;
+    /*Map of header key to data type to look for in event.headers*/
+    lambdaHeaders?:DataTypeMap;
+    /*Map of header key to data type to look for in request.headers*/
+    requestHeaders?:DataTypeMap;
+    /*Map of header key to data type to look for in resp.headers*/
+    responseHeaders?:DataTypeMap;
+    /*Map of property to data type to look for in event*/
+    eventData?:DataTypeMap;
+    /*Map of parameter to data type to look for in aws services*/
+    AWSData?:DataTypeMap;
 }
 
 export enum LOGLEVEL {

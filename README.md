@@ -34,7 +34,7 @@ var myhandler =  (event: any, context: any, callback: any) => {
 }
 myhandler = AppAgent.init(myhandler, {
     lambdaHeaders: {
-        "headertolookfor":true
+        "headertolookfor":DataType.STRING
     }
 });
 export { myhandler }
@@ -56,6 +56,65 @@ set value to the appKey for your installation
 *Note these can be set at environement or stageVariable level.  The environment Variable takes precedence.
 
 
+### App Config
+```
+export interface AppConfig {
+    /*App Key to IOT Application in AppDynamics*/
+    appKey?: string;
+    /*Optional key that will look at the event.headers for a uniqueid.  If none given, datetime.now() is used as a uniquekey */
+    uniqueIDHeader?: string;
+    /*String of which log level reporting to be done*/
+    loglevel?: string;
+    /*Map of header key to data type to look for in event.headers*/
+    lambdaHeaders?:DataTypeMap;
+    /*Map of header key to data type to look for in request.headers*/
+    requestHeaders?:DataTypeMap;
+    /*Map of header key to data type to look for in resp.headers*/
+    responseHeaders?:DataTypeMap;
+    /*Map of property to data type to look for in event*/
+    eventData?:DataTypeMap;
+    /*Map of parameter to data type to look for in aws services*/
+    AWSData?:DataTypeMap;
+}
+```
+
+Valid DataTypes should match this typing:
+```
+export enum DataType {
+    STRING = "string",
+    DATETIME = "datetime",
+    BOOLEAN = "boolean",
+    DOUBLE = "double"
+
+}
+```
+
+
+Example:
+```
+import { AppAgent } from '@appdynamicsnodelambda/nodelambda/appdynamics/AppAgent'
+import { DataType } from '@appdynamicsnodelambda/nodelambda/appdynamics/index';
+
+var handler =  (event: any, context: any, callback: any) => {
+    callback(null, 'success');
+}
+handler = AppAgent.init(handler, {
+    eventData: {
+        'EventDataPropert':DataType.STRING
+    },    
+    lambdaHeaders: {
+        'sessionID':DataType.DOUBLE,
+        'DateTimeKey': DataType.DATETIME,
+        'TestBool': DataType.BOOLEAN
+    },
+    responseHeaders: {
+        'sessionid':DataType.STRING
+    }
+
+});
+
+export { handler }
+```
 
 ### Custom data
 
@@ -87,11 +146,21 @@ A map of the datetime properties of this event, in millisecond epoch time. There
 Example usage:
 
 ```
+import { AppAgent } from '@appdynamicsnodelambda/nodelambda/appdynamics/AppAgent'
+
+
+var handler =  (event: any, context: any, callback: any) => {
     if(global.txn){
         global.txn.customData({
             stringProperties: { 'MyProperty': 'MyStringValue'}
         });
     }
+    callback(null, 'success');
+}
+handler = AppAgent.init(handler);
+export { handler }
+
+
 ```
 
 ### Logging

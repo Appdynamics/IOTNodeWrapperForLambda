@@ -1,4 +1,4 @@
-import { AppConfig, BooleanMap } from "./index";
+import { AppConfig, BooleanMap, DataTypeMap } from "./index";
 import { Transaction } from "./IOTWrapper/Transaction";
 import { HTTPInterceptor } from "./Interceptors/HTTPInterceptor";
 import { AWSInterceptor } from "./Interceptors/AWSInterceptor";
@@ -69,6 +69,7 @@ class AppAgent {
                     config = {};
                 }
                 var findHeader = HelperMethods.findEventHeaderInformation(event);
+                var findEventData = HelperMethods.findEventDataInformation(event, findHeader.beaconProperties, config.eventData as DataTypeMap);
                 var appkey = '<NO KEY SET>';
                 if (config.appKey) {
                     Logger.debug('appKey in config.');
@@ -87,7 +88,16 @@ class AppAgent {
                 Logger.debug(appkey);
                 var instrumentationenabled = true;
                 if ((process.env.APPDYNAMICS_ENABLED && process.env.APPDYNAMICS_ENABLED === "true") || (!processenvironmentset_enabled && event.stageVariables && event.stageVariables.APPDYNAMICS_ENABLED === "true")) {
-                    if (findHeader.headersFound) {
+                    if(findEventData.eventDataFound) {
+                        global.txn = new Transaction({
+                            version: process.env.AWS_LAMBDA_FUNCTION_VERSION as string,
+                            appKey: appkey || '',
+                            transactionName: requestID,
+                            transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME as string,
+                            uniqueClientId: uuid
+                        }, findEventData.beaconProperties);
+
+                    } else if (findHeader.headersFound) {
                         global.txn = new Transaction({
                             version: process.env.AWS_LAMBDA_FUNCTION_VERSION as string,
                             appKey: appkey || '',
@@ -218,15 +228,7 @@ class AppAgent {
 
             //INIT interceptors
             HTTPInterceptor.init();
-            var show: BooleanMap = {}
-            var hide: BooleanMap = {}
-            if (config.paramsToHide) {
-                hide = config.paramsToHide as BooleanMap;
-            }
-            if (config.paramsToShow) {
-                show = config.paramsToShow as BooleanMap;
-            }
-            AWSInterceptor.init(show, hide);
+            AWSInterceptor.init(config.AWSData);
 
 
 

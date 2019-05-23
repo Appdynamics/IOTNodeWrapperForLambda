@@ -1,5 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var DataType;
+(function (DataType) {
+    DataType["STRING"] = "string";
+    DataType["DATETIME"] = "datetime";
+    DataType["BOOLEAN"] = "boolean";
+    DataType["DOUBLE"] = "double";
+})(DataType = exports.DataType || (exports.DataType = {}));
 var LOGLEVEL;
 (function (LOGLEVEL) {
     LOGLEVEL[LOGLEVEL["DEBUG"] = 0] = "DEBUG";
