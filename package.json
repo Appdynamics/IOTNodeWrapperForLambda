@@ -7,7 +7,6 @@
   "author": "Michael Sickles",
   "license": "ISC",
   "dependencies": {
-    "npm": "^6.4.1",
     "@types/node": "^10.12.10"
   },
   "devDependencies": {

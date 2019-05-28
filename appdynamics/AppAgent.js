@@ -81,7 +81,7 @@ class AppAgent {
                 }
                 else if (event.stageVariables && event.stageVariables.APPDYNAMICS_APPKEY) {
                     Logger_1.Logger.debug('appKey in Stage Var.');
-                    appkey = event.APPDYNAMICS_APPKEY;
+                    appkey = event.stageVariables.APPDYNAMICS_APPKEY;
                 }
                 else {
                     Logger_1.Logger.error('No appKey found');
