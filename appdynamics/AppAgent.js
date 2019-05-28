@@ -47,7 +47,6 @@ class AppAgent {
                         Logger_1.Logger.init(loglevel);
                     }
                 }
-                Logger_1.Logger.debug(`Intrumenting func: ${func}`);
                 var uuid;
                 var contextExists = true;
                 var callbackExists = true;
