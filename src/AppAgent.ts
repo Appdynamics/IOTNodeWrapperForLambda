@@ -43,9 +43,9 @@ class AppAgent {
             var old = func;
             newfunc = function (event: any, context: any, callback: any) {
                 if (event.stageVariables && event.stageVariables.APPDYNAMICS_LOGLEVEL) {
-                    Logger.debug('loglevel in Stage Var.');
-                    var loglevel = event.APPDYNAMICS_LOGLEVEL;
+                    var loglevel = event.stageVariables.APPDYNAMICS_LOGLEVEL;
                     if(!logset) { Logger.init(loglevel);}
+                    Logger.debug('loglevel in Stage Var.');
                 }
 
                 var uuid;

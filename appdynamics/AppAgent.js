@@ -41,11 +41,11 @@ class AppAgent {
             var old = func;
             newfunc = function (event, context, callback) {
                 if (event.stageVariables && event.stageVariables.APPDYNAMICS_LOGLEVEL) {
-                    Logger_1.Logger.debug('loglevel in Stage Var.');
-                    var loglevel = event.APPDYNAMICS_LOGLEVEL;
+                    var loglevel = event.stageVariables.APPDYNAMICS_LOGLEVEL;
                     if (!logset) {
                         Logger_1.Logger.init(loglevel);
                     }
+                    Logger_1.Logger.debug('loglevel in Stage Var.');
                 }
                 var uuid;
                 var contextExists = true;
