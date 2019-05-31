@@ -64,26 +64,26 @@ class HelperMethods {
         };
         if (configMap) {
             for (var headerKey in configMap) {
-                if (res.headers && res.headers[headerKey]) {
+                if (res.headers && !!res.getHeader(headerKey)) {
                     headersFound = true;
                     Logger.debug(`Found header: ${headerKey}`);
                     var datatype: DataType = configMap[headerKey];
                     switch (datatype) {
                         case DataType.STRING:
                             if (BeaconProperties.stringProperties)
-                                BeaconProperties.stringProperties[headerKey.toLowerCase() + append] = res.headers[headerKey];
+                                BeaconProperties.stringProperties[headerKey.toLowerCase() + append] = res.getHeader(headerKey);
                             break;
                         case DataType.DATETIME:
                             if (BeaconProperties.datetimeProperties)
-                                BeaconProperties.datetimeProperties[headerKey.toLowerCase() + append] = new Date(res.headers[headerKey]).getTime();
+                                BeaconProperties.datetimeProperties[headerKey.toLowerCase() + append] = new Date(res.getHeader(headerKey)).getTime();
                             break;
                         case DataType.BOOLEAN:
                             if (BeaconProperties.booleanProperties)
-                                BeaconProperties.booleanProperties[headerKey.toLowerCase() + append] = res.headers[headerKey];
+                                BeaconProperties.booleanProperties[headerKey.toLowerCase() + append] = res.getHeader(headerKey);
                             break;
                         case DataType.DOUBLE:
                             if (BeaconProperties.doubleProperties)
-                                BeaconProperties.doubleProperties[headerKey.toLowerCase() + append] = res.headers[headerKey];
+                                BeaconProperties.doubleProperties[headerKey.toLowerCase() + append] = res.getHeader(headerKey);
                             break;
                         default:
                             Logger.warn(`DataType "${datatype}" is not a valid datatype`);
