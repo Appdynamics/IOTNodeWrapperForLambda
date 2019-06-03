@@ -6,11 +6,16 @@
   "types": "appdynamics/index.d.ts",
   "author": "Michael Sickles",
   "license": "ISC",
+  "scripts": {
+    "test": "node_modules/.bin/jasmine spec/NodeLambdaSpec.js"
+  },
   "dependencies": {
     "@types/node": "^10.12.10"
   },
   "devDependencies": {
     "@types/node": "^10.12.10",
-    "terser-webpack-plugin": "^1.1.0"
+    "aws-sdk": "^2.466.0",
+    "jasmine": "^3.4.0",
+    "request": "^2.81.0"
   }
 }
