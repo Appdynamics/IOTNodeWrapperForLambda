@@ -1,5 +1,17 @@
 import { DataTypeMap, DataType, StringMap, NetworkRequestEvent, CustomEvent, BeaconProperties, ResponseHeaders, ErrorEvent, BooleanMap } from "../index"
 import { Logger } from "./Logger";
+Object.defineProperty(Object.prototype, "getProp", {
+    value: function (prop:string) {
+        var key,self = this;
+        for (key in self) {
+            if (key.toLowerCase() == prop.toLowerCase()) {
+                return self[key];
+            }
+        }
+    },
+    //this keeps jquery happy
+    enumerable: false
+});
 class HelperMethods {
     static isValid(obj: any, prop: string) {
         if (typeof (obj[prop]) === 'undefined') {
@@ -18,26 +30,26 @@ class HelperMethods {
         var eventDataFound = false;
         if (configMap) {
             for (var dataKey in configMap) {
-                if (event && event[dataKey]) {
+                if (event && event.getProp(dataKey)) {
                     eventDataFound = true;
                     Logger.debug(`Found Event Data for : ${dataKey}`);
                     var datatype: DataType = configMap[dataKey];
                     switch (datatype) {
                         case DataType.STRING:
                             if (BeaconProperties.stringProperties)
-                                BeaconProperties.stringProperties[dataKey.toLowerCase() + "_evt"] = event[dataKey];
+                                BeaconProperties.stringProperties[dataKey.toLowerCase() + "_evt"] = event.getProp(dataKey);
                             break;
                         case DataType.DATETIME:
                             if (BeaconProperties.datetimeProperties)
-                                BeaconProperties.datetimeProperties[dataKey.toLowerCase() + "_evt"] = new Date(event[dataKey]).getTime();
+                                BeaconProperties.datetimeProperties[dataKey.toLowerCase() + "_evt"] = new Date(event.getProp(dataKey)).getTime();
                             break;
                         case DataType.BOOLEAN:
                             if (BeaconProperties.booleanProperties)
-                                BeaconProperties.booleanProperties[dataKey.toLowerCase() + "_evt"] = event[dataKey];
+                                BeaconProperties.booleanProperties[dataKey.toLowerCase() + "_evt"] = event.getProp(dataKey);
                             break;
                         case DataType.DOUBLE:
                             if (BeaconProperties.doubleProperties)
-                                BeaconProperties.doubleProperties[dataKey.toLowerCase() + "_evt"] = event[dataKey];
+                                BeaconProperties.doubleProperties[dataKey.toLowerCase() + "_evt"] = event.getProp(dataKey);
                             break;
                         default:
                             Logger.warn(`DataType "${datatype}" is not a valid datatype`);
