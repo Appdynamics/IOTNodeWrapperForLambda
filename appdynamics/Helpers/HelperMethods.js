@@ -2,6 +2,18 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const index_1 = require("../index");
 const Logger_1 = require("./Logger");
+Object.defineProperty(Object.prototype, "getProp", {
+    value: function (prop) {
+        var key, self = this;
+        for (key in self) {
+            if (key.toLowerCase() == prop.toLowerCase()) {
+                return self[key];
+            }
+        }
+    },
+    //this keeps jquery happy
+    enumerable: false
+});
 class HelperMethods {
     static isValid(obj, prop) {
         if (typeof (obj[prop]) === 'undefined') {
@@ -20,26 +32,26 @@ class HelperMethods {
         var eventDataFound = false;
         if (configMap) {
             for (var dataKey in configMap) {
-                if (event && event[dataKey]) {
+                if (event && event.getProp(dataKey)) {
                     eventDataFound = true;
                     Logger_1.Logger.debug(`Found Event Data for : ${dataKey}`);
                     var datatype = configMap[dataKey];
                     switch (datatype) {
                         case index_1.DataType.STRING:
                             if (BeaconProperties.stringProperties)
-                                BeaconProperties.stringProperties[dataKey.toLowerCase() + "_evt"] = event[dataKey];
+                                BeaconProperties.stringProperties[dataKey.toLowerCase() + "_evt"] = event.getProp(dataKey);
                             break;
                         case index_1.DataType.DATETIME:
                             if (BeaconProperties.datetimeProperties)
-                                BeaconProperties.datetimeProperties[dataKey.toLowerCase() + "_evt"] = new Date(event[dataKey]).getTime();
+                                BeaconProperties.datetimeProperties[dataKey.toLowerCase() + "_evt"] = new Date(event.getProp(dataKey)).getTime();
                             break;
                         case index_1.DataType.BOOLEAN:
                             if (BeaconProperties.booleanProperties)
-                                BeaconProperties.booleanProperties[dataKey.toLowerCase() + "_evt"] = event[dataKey];
+                                BeaconProperties.booleanProperties[dataKey.toLowerCase() + "_evt"] = event.getProp(dataKey);
                             break;
                         case index_1.DataType.DOUBLE:
                             if (BeaconProperties.doubleProperties)
-                                BeaconProperties.doubleProperties[dataKey.toLowerCase() + "_evt"] = event[dataKey];
+                                BeaconProperties.doubleProperties[dataKey.toLowerCase() + "_evt"] = event.getProp(dataKey);
                             break;
                         default:
                             Logger_1.Logger.warn(`DataType "${datatype}" is not a valid datatype`);
@@ -63,26 +75,26 @@ class HelperMethods {
         };
         if (configMap) {
             for (var headerKey in configMap) {
-                if (res.headers && res.headers[headerKey]) {
+                if (res.headers && !!res.getHeader(headerKey)) {
                     headersFound = true;
                     Logger_1.Logger.debug(`Found header: ${headerKey}`);
                     var datatype = configMap[headerKey];
                     switch (datatype) {
                         case index_1.DataType.STRING:
                             if (BeaconProperties.stringProperties)
-                                BeaconProperties.stringProperties[headerKey.toLowerCase() + append] = res.headers[headerKey];
+                                BeaconProperties.stringProperties[headerKey.toLowerCase() + append] = res.getHeader(headerKey);
                             break;
                         case index_1.DataType.DATETIME:
                             if (BeaconProperties.datetimeProperties)
-                                BeaconProperties.datetimeProperties[headerKey.toLowerCase() + append] = new Date(res.headers[headerKey]).getTime();
+                                BeaconProperties.datetimeProperties[headerKey.toLowerCase() + append] = new Date(res.getHeader(headerKey)).getTime();
                             break;
                         case index_1.DataType.BOOLEAN:
                             if (BeaconProperties.booleanProperties)
-                                BeaconProperties.booleanProperties[headerKey.toLowerCase() + append] = res.headers[headerKey];
+                                BeaconProperties.booleanProperties[headerKey.toLowerCase() + append] = res.getHeader(headerKey);
                             break;
                         case index_1.DataType.DOUBLE:
                             if (BeaconProperties.doubleProperties)
-                                BeaconProperties.doubleProperties[headerKey.toLowerCase() + append] = res.headers[headerKey];
+                                BeaconProperties.doubleProperties[headerKey.toLowerCase() + append] = res.getHeader(headerKey);
                             break;
                         default:
                             Logger_1.Logger.warn(`DataType "${datatype}" is not a valid datatype`);
