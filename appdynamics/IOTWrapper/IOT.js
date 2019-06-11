@@ -28,7 +28,7 @@ class IOT {
             hostname: this.config.collector,
             port: 443,
             path: this.path,
-            method: 'POST'
+            method: 'POST',
             proxy: 'http://forwardproxy.extnp.national.com.au:3128'
         };
 
