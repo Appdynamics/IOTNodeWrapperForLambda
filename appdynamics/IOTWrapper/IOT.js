@@ -48,6 +48,7 @@ class IOT {
         }
 
         request(options, callbacks);
+        Logger_1.Logger.debug('Done');
     }
 
     // sendBeaconAsync(beacon) {
