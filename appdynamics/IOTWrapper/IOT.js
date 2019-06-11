@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const https = require("https");
+const HttpsProxyAgent = require('https-proxy-agent');
 const Logger_1 = require("../Helpers/Logger");
 var agent = new HttpsProxyAgent({
     proxyHost: 'http://forwardproxy.extnp.national.com.au',
@@ -30,7 +31,8 @@ class IOT {
             hostname: this.config.collector,
             port: 443,
             path: this.path,
-            method: 'POST'
+            method: 'POST',
+            agent: agent
         };
         Logger_1.Logger.debug('IOT Beacon:');
         Logger_1.Logger.debug(JSON.stringify(beacon));
@@ -49,7 +51,8 @@ class IOT {
                 hostname: this.config.collector,
                 port: 443,
                 path: this.path,
-                method: 'POST'
+                method: 'POST',
+                agent: agent
             };
             Logger_1.Logger.debug('-=-=-=-=-=-=-=-  IOT Beacon -=-=-=-=-=-=-=-=');
             Logger_1.Logger.debug(JSON.stringify(beacon));
