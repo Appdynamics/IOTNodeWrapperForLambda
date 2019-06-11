@@ -47,7 +47,7 @@ class IOT {
             }
         }
         Logger_1.Logger.debug('Running');
-        request(options, callbacks);
+        request(options, callback);
         Logger_1.Logger.debug('Done');
     }
 
