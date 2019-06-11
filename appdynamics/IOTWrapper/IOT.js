@@ -28,7 +28,7 @@ class IOT {
             path: this.config.collector + this.path,
             method: 'POST',
             headers: {
-              Host: this.path
+              Host: this.config.collector + this.path
             }
         };
         Logger_1.Logger.debug('IOT Beacon:');
@@ -50,7 +50,7 @@ class IOT {
                 path: this.config.collector + this.path,
                 method: 'POST',
                 headers: {
-                  Host: this.path
+                  Host: this.config.collector + this.path
                 }
             };
             Logger_1.Logger.debug('-=-=-=-=-=-=-=-  IOT Beacon -=-=-=-=-=-=-=-=');
