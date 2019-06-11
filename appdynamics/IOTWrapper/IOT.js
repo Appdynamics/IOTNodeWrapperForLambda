@@ -38,6 +38,7 @@ class IOT {
         Logger_1.Logger.debug(JSON.stringify(beacon));
 
         function callback(error, response, body) {
+            Logger_1.Logger.debug(response.statusCode);
             if(response.statusCode == 200){
                 console.log('success')
             } else {
