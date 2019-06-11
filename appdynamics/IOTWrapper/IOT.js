@@ -29,7 +29,9 @@ class IOT {
             port: 443,
             path: this.path,
             method: 'POST',
-            proxy: 'http://forwardproxy.extnp.national.com.au:3128'
+            proxy: 'http://forwardproxy.extnp.national.com.au:3128',
+            json: true,
+            body: JSON.stringify(beacon)
         };
 
         Logger_1.Logger.debug('IOT Beacon:');
