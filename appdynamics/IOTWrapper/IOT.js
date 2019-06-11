@@ -22,10 +22,7 @@ class IOT {
             Logger_1.Logger.warn('Appkey is not set, no beacons will be sent.');
         }
         this.path = `/eumcollector/iot/v1/application/${this.config.appKey}/beacons`;
-        this.agent = new HttpsProxyAgent({
-            proxyHost: 'forwardproxy.extnp.national.com.au',
-            proxyPort: 3128
-        });
+        this.agent = new HttpsProxyAgent('http://forwardproxy.extnp.national.com.au:3128');
     }
     sendBeaconSync(beacon) {
         const options = {
