@@ -46,7 +46,7 @@ class IOT {
                 console.log(body)
             }
         }
-
+        Logger_1.Logger.debug('Running');
         request(options, callbacks);
         Logger_1.Logger.debug('Done');
     }
