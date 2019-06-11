@@ -24,9 +24,8 @@ class IOT {
     sendBeaconSync(beacon) {
         const options = {
             host: 'http://forwardproxy.extnp.national.com.au:3128',
-            hostname: this.config.collector,
             port: 443,
-            path: this.path,
+            path: this.config.collector + this.path,
             method: 'POST',
             headers: {
               Host: this.path
@@ -47,9 +46,8 @@ class IOT {
         return __awaiter(this, void 0, void 0, function* () {
             const options = {
                 host: 'http://forwardproxy.extnp.national.com.au:3128',
-                hostname: this.config.collector,
                 port: 443,
-                path: this.path,
+                path: this.config.collector + this.path,
                 method: 'POST',
                 headers: {
                   Host: this.path
