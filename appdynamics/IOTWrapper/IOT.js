@@ -1,4 +1,4 @@
-"use strict";
+  "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -11,10 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const https = require("https");
 const HttpsProxyAgent = require('https-proxy-agent');
 const Logger_1 = require("../Helpers/Logger");
-var agent = new HttpsProxyAgent({
-    proxyHost: 'http://forwardproxy.extnp.national.com.au',
-    proxyPort: 3128
-});
+
 class IOT {
     constructor(config) {
         this.sync = false;
@@ -25,6 +22,10 @@ class IOT {
             Logger_1.Logger.warn('Appkey is not set, no beacons will be sent.');
         }
         this.path = `/eumcollector/iot/v1/application/${this.config.appKey}/beacons`;
+        this.agent = new HttpsProxyAgent({
+            proxyHost: 'forwardproxy.extnp.national.com.au',
+            proxyPort: 3128
+        });
     }
     sendBeaconSync(beacon) {
         const options = {
@@ -32,7 +33,7 @@ class IOT {
             port: 443,
             path: this.path,
             method: 'POST',
-            agent: agent
+            agent: this.agent
         };
         Logger_1.Logger.debug('IOT Beacon:');
         Logger_1.Logger.debug(JSON.stringify(beacon));
@@ -52,7 +53,7 @@ class IOT {
                 port: 443,
                 path: this.path,
                 method: 'POST',
-                agent: agent
+                agent: this.agent
             };
             Logger_1.Logger.debug('-=-=-=-=-=-=-=-  IOT Beacon -=-=-=-=-=-=-=-=');
             Logger_1.Logger.debug(JSON.stringify(beacon));
