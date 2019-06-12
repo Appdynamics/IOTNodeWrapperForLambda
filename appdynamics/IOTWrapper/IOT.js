@@ -59,9 +59,7 @@ class IOT {
                 const req = https.request(options, function (res) {
                     resolve('Success');
                     Logger_1.Logger.debug(res.statusCode);
-                    res.on('data', function (chunk) {
-                      console.log('BODY: ' + chunk)
-                    });
+                    Logger_1.Logger.debug(res.statusMessage);
                 });
                 req.on('error', (err) => reject(err));
                 const json = JSON.stringify(beacon);
