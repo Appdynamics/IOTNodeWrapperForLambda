@@ -58,7 +58,7 @@ class IOT {
             return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
                 const req = https.request(options, function (res) {
                     resolve('Success');
-                    Logger_1.Logger.debug(res);
+                    Logger_1.Logger.debug(res.toString());
                 });
                 req.on('error', (err) => reject(err));
                 const json = JSON.stringify(beacon);
