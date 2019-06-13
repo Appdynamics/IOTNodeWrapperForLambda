@@ -86,8 +86,9 @@ class AppAgent {
                     Logger_1.Logger.error('No appKey found');
                 }
                 //Find proxy if it is set
+                var httpsProxy = ''
                 if (process.env.APPDYNAMICS_HTTPS_PROXY) {
-                    Logger_1.Logger.debug('https poxy found');
+                    Logger_1.Logger.debug('https proxy found');
                     httpsProxy = process.env.APPDYNAMICS_HTTPS_PROXY;
                 }
                 
@@ -98,7 +99,7 @@ class AppAgent {
                         global.txn = new Transaction_1.Transaction({
                             version: process.env.AWS_LAMBDA_FUNCTION_VERSION,
                             appKey: appkey || '',
-                            httpsProxy: httpsProxy || '',
+                            httpsProxy: httpsProxy,
                             transactionName: requestID,
                             transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME,
                             uniqueClientId: uuid
@@ -108,7 +109,7 @@ class AppAgent {
                         global.txn = new Transaction_1.Transaction({
                             version: process.env.AWS_LAMBDA_FUNCTION_VERSION,
                             appKey: appkey || '',
-                            httpsProxy: httpsProxy || '',
+                            httpsProxy: httpsProxy,
                             transactionName: requestID,
                             transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME,
                             uniqueClientId: uuid
@@ -118,7 +119,7 @@ class AppAgent {
                         global.txn = new Transaction_1.Transaction({
                             version: process.env.AWS_LAMBDA_FUNCTION_VERSION,
                             appKey: appkey || '',
-                            httpsProxy: httpsProxy || '',
+                            httpsProxy: httpsProxy,
                             transactionName: requestID,
                             transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME,
                             uniqueClientId: uuid

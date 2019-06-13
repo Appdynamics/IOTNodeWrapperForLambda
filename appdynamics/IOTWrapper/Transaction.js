@@ -47,7 +47,7 @@ class Transaction {
         this.config = cust_config;
         this.iot = new IOT_1.IOT({
             appKey: this.config.appKey,
-            httpsProxy: this.config.httpsProxy || '',
+            httpsProxy: this.config.httpsProxy,
             collector: this.config.collector
         });
     }
