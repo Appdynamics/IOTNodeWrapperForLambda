@@ -41,8 +41,7 @@ class Transaction {
             this.isValid = false;
             return;
         }
-        cust_config = HelperMethods_1.HelperMethods.propertyOrDefault(cust_config, 'collector', 'syd-iot-col.eum-appdynamics.com');
-        //cust_config = HelperMethods_1.HelperMethods.propertyOrDefault(cust_config, 'collector', 'syd-col.eum-appdynamics.com');
+        cust_config = HelperMethods_1.HelperMethods.propertyOrDefault(cust_config, 'collector', this.collectorUrl);
         cust_config = HelperMethods_1.HelperMethods.propertyOrDefault(cust_config, "uniqueClientId", (new Date()).getTime().toString());
         cust_config = HelperMethods_1.HelperMethods.propertyOrDefault(cust_config, "debug", false);
         this.config = cust_config;
