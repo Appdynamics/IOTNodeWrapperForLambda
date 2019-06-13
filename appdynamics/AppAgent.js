@@ -90,6 +90,7 @@ class AppAgent {
                 if (process.env.APPDYNAMICS_COLLECTOR_URL) {
                     Logger_1.Logger.debug('Collector Url found in environment');
                     collectorUrl = process.env.APPDYNAMICS_COLLECTOR_URL;
+                }
                 //Find proxy if it is set
                 var httpsProxy = ''
                 if (process.env.APPDYNAMICS_HTTPS_PROXY) {
