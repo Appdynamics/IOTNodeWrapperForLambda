@@ -137,7 +137,7 @@ class AppAgent {
                     Logger.warn('Appdynamics::Warn::Appdynamics instrumentation is not enabled.');
                 }
 
-                Logger.debug('Staring Transaction');
+                Logger.debug('Starting Transaction');
 
                 if (!callback) {
                     Logger.warn('callback not given in function, have to stop txn in process.exit synchronously');
