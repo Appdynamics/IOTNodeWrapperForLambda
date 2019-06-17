@@ -54,13 +54,14 @@ class Transaction {
             return;
         }
 
-        cust_config = HelperMethods.propertyOrDefault(cust_config, 'collector', 'iot-col.eum-appdynamics.com') as TransactionConfiguration;
+        cust_config = HelperMethods.propertyOrDefault(cust_config, 'collector', this.config.collector) as TransactionConfiguration;
         cust_config = HelperMethods.propertyOrDefault(cust_config, "uniqueClientId", (new Date()).getTime().toString()) as TransactionConfiguration
         cust_config = HelperMethods.propertyOrDefault(cust_config, "debug", false) as TransactionConfiguration
         this.config = cust_config;
 
         this.iot = new IOT({
             appKey: this.config.appKey,
+            httpsProxy: this.config.httpsProxy,
             collector: this.config.collector as string
         });
     }

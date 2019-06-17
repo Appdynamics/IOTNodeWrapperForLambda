@@ -82,6 +82,18 @@ class AppAgent {
                 } else {
                     Logger.error('No appKey found');
                 }
+                //Set collector url
+                var collector = 'syd-iot-col.eum-appdynamics.com'
+                if (process.env.APPDYNAMICS_COLLECTOR_URL) {
+                    Logger.debug('Collector Url found in environment');
+                    collector = process.env.APPDYNAMICS_COLLECTOR_URL;
+                }
+                //Find proxy if it is set
+                var httpsProxy = ''
+                if (process.env.APPDYNAMICS_HTTPS_PROXY) {
+                    Logger.debug('https proxy found in environment');
+                    httpsProxy = process.env.APPDYNAMICS_HTTPS_PROXY;
+                }
 
 
                 Logger.debug(appkey);
@@ -91,6 +103,8 @@ class AppAgent {
                         global.txn = new Transaction({
                             version: process.env.AWS_LAMBDA_FUNCTION_VERSION as string,
                             appKey: appkey || '',
+                            httpsProxy: httpsProxy,
+                            collector: collector,
                             transactionName: requestID,
                             transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME as string,
                             uniqueClientId: uuid
@@ -100,6 +114,8 @@ class AppAgent {
                         global.txn = new Transaction({
                             version: process.env.AWS_LAMBDA_FUNCTION_VERSION as string,
                             appKey: appkey || '',
+                            httpsProxy: httpsProxy,
+                            collector: collector,
                             transactionName: requestID,
                             transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME as string,
                             uniqueClientId: uuid
@@ -109,6 +125,8 @@ class AppAgent {
                         global.txn = new Transaction({
                             version: process.env.AWS_LAMBDA_FUNCTION_VERSION as string,
                             appKey: appkey || '',
+                            httpsProxy: httpsProxy,
+                            collector: collector,
                             transactionName: requestID,
                             transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME as string,
                             uniqueClientId: uuid

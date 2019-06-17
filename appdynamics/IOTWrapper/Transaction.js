@@ -41,7 +41,7 @@ class Transaction {
             this.isValid = false;
             return;
         }
-        cust_config = HelperMethods_1.HelperMethods.propertyOrDefault(cust_config, 'collector', this.config.collectorUrl);
+        cust_config = HelperMethods_1.HelperMethods.propertyOrDefault(cust_config, 'collector', this.config.collector);
         cust_config = HelperMethods_1.HelperMethods.propertyOrDefault(cust_config, "uniqueClientId", (new Date()).getTime().toString());
         cust_config = HelperMethods_1.HelperMethods.propertyOrDefault(cust_config, "debug", false);
         this.config = cust_config;

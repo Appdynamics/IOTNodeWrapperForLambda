@@ -3,6 +3,7 @@ import { ExitCall } from "./IOTWrapper/ExitCall";
 export interface IOTConfig {
     appKey: string;
     collector: string;
+    httpsProxy: string;
 }
 export interface IOTBeacon {
     deviceInfo: DeviceInfo;
@@ -126,6 +127,7 @@ export interface ExitCallConfiguration {
 export interface TransactionConfiguration {
     collector?: string;
     appKey: string;
+    httpsProxy: string;
     version: string;
     transactionName: string;
     transactionType: string;

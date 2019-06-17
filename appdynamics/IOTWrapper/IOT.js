@@ -1,4 +1,4 @@
-  "use strict";
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -11,7 +11,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const https = require("https");
 const HttpsProxyAgent = require('https-proxy-agent');
 const Logger_1 = require("../Helpers/Logger");
-
 class IOT {
     constructor(config) {
         this.sync = false;
@@ -58,8 +57,6 @@ class IOT {
             return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
                 const req = https.request(options, function (res) {
                     resolve('Success');
-                    Logger_1.Logger.debug(res.statusCode);
-                    Logger_1.Logger.debug(res.statusMessage);
                 });
                 req.on('error', (err) => reject(err));
                 const json = JSON.stringify(beacon);
