@@ -163,6 +163,23 @@ export { handler }
 
 ```
 
+### Exit Calls
+By default, the agent will pick up any requests that utilize the http module or aws-sdk events.  For exit points not picked up by default, custom code can be used like so to add an exit point to your transaction
+
+```
+  if(global.txn) {
+        myexitcall = global.txn.createHTTPExitCall({
+            url: 'urlofexitcall.com'
+        }) as ExitCall;
+    }
+
+    mylibrary.getresults((data)=> {
+        if(myexitcall) {
+            myexitcall.stop();
+        }
+    });
+```
+
 ### Logging
 APPDYNAMICS_LOGLEVEL can be added at the environment or stage level to enable logging
 
