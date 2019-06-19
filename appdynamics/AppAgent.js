@@ -85,6 +85,18 @@ class AppAgent {
                 else {
                     Logger_1.Logger.error('No appKey found');
                 }
+                //Set collector url
+                var collector = 'syd-iot-col.eum-appdynamics.com';
+                if (process.env.APPDYNAMICS_COLLECTOR_URL) {
+                    Logger_1.Logger.debug('Collector Url found in environment');
+                    collector = process.env.APPDYNAMICS_COLLECTOR_URL;
+                }
+                //Find proxy if it is set
+                var httpsProxy = '';
+                if (process.env.APPDYNAMICS_HTTPS_PROXY) {
+                    Logger_1.Logger.debug('https proxy found in environment');
+                    httpsProxy = process.env.APPDYNAMICS_HTTPS_PROXY;
+                }
                 Logger_1.Logger.debug(appkey);
                 var instrumentationenabled = true;
                 if ((process.env.APPDYNAMICS_ENABLED && process.env.APPDYNAMICS_ENABLED === "true") || (!processenvironmentset_enabled && event.stageVariables && event.stageVariables.APPDYNAMICS_ENABLED === "true")) {
@@ -92,6 +104,8 @@ class AppAgent {
                         global.txn = new Transaction_1.Transaction({
                             version: process.env.AWS_LAMBDA_FUNCTION_VERSION,
                             appKey: appkey || '',
+                            httpsProxy: httpsProxy,
+                            collector: collector,
                             transactionName: requestID,
                             transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME,
                             uniqueClientId: uuid
@@ -101,6 +115,8 @@ class AppAgent {
                         global.txn = new Transaction_1.Transaction({
                             version: process.env.AWS_LAMBDA_FUNCTION_VERSION,
                             appKey: appkey || '',
+                            httpsProxy: httpsProxy,
+                            collector: collector,
                             transactionName: requestID,
                             transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME,
                             uniqueClientId: uuid
@@ -110,6 +126,8 @@ class AppAgent {
                         global.txn = new Transaction_1.Transaction({
                             version: process.env.AWS_LAMBDA_FUNCTION_VERSION,
                             appKey: appkey || '',
+                            httpsProxy: httpsProxy,
+                            collector: collector,
                             transactionName: requestID,
                             transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME,
                             uniqueClientId: uuid
@@ -120,7 +138,7 @@ class AppAgent {
                     instrumentationenabled = false;
                     Logger_1.Logger.warn('Appdynamics::Warn::Appdynamics instrumentation is not enabled.');
                 }
-                Logger_1.Logger.debug('Staring Transaction');
+                Logger_1.Logger.debug('Starting Transaction');
                 if (!callback) {
                     Logger_1.Logger.warn('callback not given in function, have to stop txn in process.exit synchronously');
                     callbackExists = false;

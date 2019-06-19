@@ -41,12 +41,13 @@ class Transaction {
             this.isValid = false;
             return;
         }
-        cust_config = HelperMethods_1.HelperMethods.propertyOrDefault(cust_config, 'collector', 'iot-col.eum-appdynamics.com');
+        cust_config = HelperMethods_1.HelperMethods.propertyOrDefault(cust_config, 'collector', this.config.collector);
         cust_config = HelperMethods_1.HelperMethods.propertyOrDefault(cust_config, "uniqueClientId", (new Date()).getTime().toString());
         cust_config = HelperMethods_1.HelperMethods.propertyOrDefault(cust_config, "debug", false);
         this.config = cust_config;
         this.iot = new IOT_1.IOT({
             appKey: this.config.appKey,
+            httpsProxy: this.config.httpsProxy,
             collector: this.config.collector
         });
     }

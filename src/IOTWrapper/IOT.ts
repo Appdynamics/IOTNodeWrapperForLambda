@@ -1,13 +1,16 @@
 import https = require('https');
+const HttpsProxyAgent = require('https-proxy-agent');
 import { IOTConfig, IOTBeacon } from "../index"
 import { HelperMethods } from "../Helpers/HelperMethods"
 import { Logger } from "../Helpers/Logger"
+import { Agent } from 'http';
 class IOT {
 
     config: IOTConfig;
     path: string;
     sync:boolean = false;
     isValid:boolean = true;
+    agent: Agent;
 
     constructor(config: IOTConfig) {
         this.config = config;
@@ -16,13 +19,19 @@ class IOT {
             Logger.warn('Appkey is not set, no beacons will be sent.');
         }
         this.path = `/eumcollector/iot/v1/application/${this.config.appKey}/beacons`;
+        if (this.config.httpsProxy != '') {
+            this.agent = new HttpsProxyAgent(this.config.httpsProxy);
+        } else {
+            this.agent = new Agent();
+        }
     }
     sendBeaconSync(beacon: IOTBeacon) {
         const options: https.RequestOptions = {
             hostname: this.config.collector,
             port: 443,
             path: this.path,
-            method: 'POST'
+            method: 'POST',
+            agent: this.agent
         }
         Logger.debug('IOT Beacon:')
         Logger.debug(JSON.stringify(beacon));
@@ -42,7 +51,8 @@ class IOT {
             hostname: this.config.collector,
             port: 443,
             path: this.path,
-            method: 'POST'
+            method: 'POST',
+            agent: this.agent
         }
         Logger.debug('-=-=-=-=-=-=-=-  IOT Beacon -=-=-=-=-=-=-=-=')
         Logger.debug(JSON.stringify(beacon));
