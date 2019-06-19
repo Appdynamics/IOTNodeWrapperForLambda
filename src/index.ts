@@ -145,7 +145,7 @@ export interface TransactionConfiguration {
     version: string;
     transactionName: string;
     transactionType: string;
-    uniqueClientId?: string;
+    uniqueClientId: string;
     lambdaHeaders?: StringMap;
 }
 

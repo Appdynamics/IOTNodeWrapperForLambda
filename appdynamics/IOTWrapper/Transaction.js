@@ -81,7 +81,7 @@ class Transaction {
                 deviceInfo: {
                     deviceName: this.config.transactionName,
                     deviceType: this.config.transactionType,
-                    deviceId: this.config.transactionName
+                    deviceId: this.config.uniqueClientId
                 },
                 versionInfo: {
                     softwareVersion: this.config.version
@@ -111,7 +111,7 @@ class Transaction {
                 deviceInfo: {
                     deviceName: this.config.transactionName,
                     deviceType: this.config.transactionType,
-                    deviceId: this.config.transactionName
+                    deviceId: this.config.uniqueClientId
                 },
                 versionInfo: {
                     softwareVersion: this.config.version
@@ -149,7 +149,7 @@ class Transaction {
                 deviceInfo: {
                     deviceName: this.config.transactionName,
                     deviceType: this.config.transactionType,
-                    deviceId: this.config.transactionName
+                    deviceId: this.config.uniqueClientId
                 },
                 versionInfo: {
                     softwareVersion: this.config.version
@@ -169,7 +169,7 @@ class Transaction {
                 deviceInfo: {
                     deviceName: this.config.transactionName,
                     deviceType: this.config.transactionType,
-                    deviceId: this.config.transactionName
+                    deviceId: this.config.uniqueClientId
                 },
                 versionInfo: {
                     softwareVersion: this.config.version
