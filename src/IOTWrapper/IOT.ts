@@ -68,7 +68,7 @@ class IOT {
         if(this.sync && this.isValid) {
             this.sendBeaconSync(beacon);
         } else if (this.isValid){
-            this.sendBeaconAsync(beacon).catch((err) => { Logger.error(err)});
+            this.sendBeaconAsync(beacon).catch((err) => { Logger.error(JSON.stringify(err))});
         }
     }
 }
