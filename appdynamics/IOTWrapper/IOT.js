@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const https = require("https");
 const HttpsProxyAgent = require('https-proxy-agent');
 const Logger_1 = require("../Helpers/Logger");
+const http_1 = require("http");
 class IOT {
     constructor(config) {
         this.sync = false;
@@ -21,7 +22,12 @@ class IOT {
             Logger_1.Logger.warn('Appkey is not set, no beacons will be sent.');
         }
         this.path = `/eumcollector/iot/v1/application/${this.config.appKey}/beacons`;
-        this.agent = new HttpsProxyAgent(this.config.httpsProxy);
+        if (this.config.httpsProxy != '') {
+            this.agent = new HttpsProxyAgent(this.config.httpsProxy);
+        }
+        else {
+            this.agent = new http_1.Agent();
+        }
     }
     sendBeaconSync(beacon) {
         const options = {

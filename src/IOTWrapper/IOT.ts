@@ -19,7 +19,11 @@ class IOT {
             Logger.warn('Appkey is not set, no beacons will be sent.');
         }
         this.path = `/eumcollector/iot/v1/application/${this.config.appKey}/beacons`;
-        this.agent = new HttpsProxyAgent(this.config.httpsProxy);
+        if (this.config.httpsProxy != '') {
+            this.agent = new HttpsProxyAgent(this.config.httpsProxy);
+        } else {
+            this.agent = new Agent();
+        }
     }
     sendBeaconSync(beacon: IOTBeacon) {
         const options: https.RequestOptions = {
