@@ -37,7 +37,7 @@ class HTTPInterceptor {
                     } else {
                         var http1 = global.txn.createHTTPExitCall({
                             url: `${http}://${host}${port}${path}`
-                        });
+                        },{});
                     }
 
                     var onRes = function (res: any) {

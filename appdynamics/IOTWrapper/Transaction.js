@@ -154,7 +154,7 @@ class Transaction {
                 versionInfo: {
                     softwareVersion: this.config.version
                 },
-                stringProperties: stringProperties,
+                stringProperties: HelperMethods_1.HelperMethods.setStringPropertiesTogether(this.beaconProperties.stringProperties, stringProperties),
                 uniqueClientId: this.config.uniqueClientId
             });
             return exitcall;
@@ -174,7 +174,7 @@ class Transaction {
                 versionInfo: {
                     softwareVersion: this.config.version
                 },
-                stringProperties: stringProperties,
+                stringProperties: HelperMethods_1.HelperMethods.setStringPropertiesTogether(this.beaconProperties.stringProperties, stringProperties),
                 networkRequestProperties: networkRequestProperties,
                 uniqueClientId: this.config.uniqueClientId
             });

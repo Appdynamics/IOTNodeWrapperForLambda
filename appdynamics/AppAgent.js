@@ -59,9 +59,6 @@ class AppAgent {
                 else {
                     requestID = context.awsRequestId;
                 }
-                if (config && config.uniqueIDHeader && event.headers && event.headers[config.uniqueIDHeader]) {
-                    uuid = event.headers[config.uniqueIDHeader];
-                }
                 Logger_1.Logger.debug('Creating transaction');
                 global.AppConfig = config || {};
                 if (!config) {
@@ -92,27 +89,27 @@ class AppAgent {
                         global.txn = new Transaction_1.Transaction({
                             version: process.env.AWS_LAMBDA_FUNCTION_VERSION,
                             appKey: appkey || '',
-                            transactionName: requestID,
-                            transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME,
-                            uniqueClientId: uuid
+                            transactionName: process.env.AWS_LAMBDA_FUNCTION_NAME,
+                            transactionType: 'Lambda',
+                            uniqueClientId: requestID
                         }, findEventData.beaconProperties);
                     }
                     else if (findHeader.headersFound) {
                         global.txn = new Transaction_1.Transaction({
                             version: process.env.AWS_LAMBDA_FUNCTION_VERSION,
                             appKey: appkey || '',
-                            transactionName: requestID,
-                            transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME,
-                            uniqueClientId: uuid
+                            transactionName: process.env.AWS_LAMBDA_FUNCTION_NAME,
+                            transactionType: 'Lambda',
+                            uniqueClientId: requestID
                         }, findHeader.beaconProperties);
                     }
                     else {
                         global.txn = new Transaction_1.Transaction({
                             version: process.env.AWS_LAMBDA_FUNCTION_VERSION,
                             appKey: appkey || '',
-                            transactionName: requestID,
-                            transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME,
-                            uniqueClientId: uuid
+                            transactionName: process.env.AWS_LAMBDA_FUNCTION_NAME,
+                            transactionType: 'Lambda',
+                            uniqueClientId: requestID
                         });
                     }
                 }

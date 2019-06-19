@@ -176,7 +176,7 @@ class Transaction {
                 versionInfo: {
                     softwareVersion: this.config.version
                 },
-                stringProperties: stringProperties,
+                stringProperties: HelperMethods.setStringPropertiesTogether(this.beaconProperties.stringProperties as StringMap, stringProperties as StringMap),
                 uniqueClientId: this.config.uniqueClientId as string
             });
             return exitcall;
@@ -184,7 +184,7 @@ class Transaction {
             Logger.error(`Transaction not valid.  Exit call not created`);
         }
     }
-    createHTTPExitCall(networkRequestProperties: NetworkRequestEvent, stringProperties?: StringMap) {
+    createHTTPExitCall(networkRequestProperties: NetworkRequestEvent, stringProperties: StringMap) {
         if (this.isValid) {
             const exitCall: ExitCall = new ExitCall(this.iot as IOT, "HTTP", {
                 deviceInfo: {
@@ -195,7 +195,7 @@ class Transaction {
                 versionInfo: {
                     softwareVersion: this.config.version
                 },
-                stringProperties: stringProperties,
+                stringProperties: HelperMethods.setStringPropertiesTogether(this.beaconProperties.stringProperties as StringMap, stringProperties),
                 networkRequestProperties: networkRequestProperties,
                 uniqueClientId: this.config.uniqueClientId as string
             });
