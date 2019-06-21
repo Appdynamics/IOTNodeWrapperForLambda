@@ -27,3 +27,6 @@ node_modules/*
 .DS_Store
 *.vbs
 package-lock.json
+spec/support/awsconfig.json
+spec/support/config.json
+spec/support/exampleoutput.json

@@ -51,6 +51,12 @@ class AppAgent {
                 var contextExists = true;
                 var callbackExists = true;
                 var requestID = '';
+                var beaconProperties = {
+                    stringProperties: {},
+                    doubleProperties: {},
+                    datetimeProperties: {},
+                    booleanProperties: {},
+                };
                 if (!context) {
                     Logger_1.Logger.warn('context not given in function, generating uuid');
                     contextExists = false;
@@ -58,9 +64,12 @@ class AppAgent {
                 }
                 else {
                     requestID = context.awsRequestId;
+                    if (beaconProperties && beaconProperties.stringProperties) {
+                        beaconProperties.stringProperties['awsrequestid'] = requestID;
+                    }
                 }
                 if (config && config.uniqueIDHeader && event.headers && event.headers[config.uniqueIDHeader]) {
-                    uuid = event.headers[config.uniqueIDHeader];
+                    requestID = event.headers[config.uniqueIDHeader];
                 }
                 Logger_1.Logger.debug('Creating transaction');
                 global.AppConfig = config || {};
@@ -69,6 +78,8 @@ class AppAgent {
                 }
                 var findHeader = HelperMethods_1.HelperMethods.findEventHeaderInformation(event);
                 var findEventData = HelperMethods_1.HelperMethods.findEventDataInformation(event, findHeader.beaconProperties, config.eventData);
+                findHeader.beaconProperties = HelperMethods_1.HelperMethods.mergeBeaconProperties(beaconProperties, findHeader.beaconProperties);
+                findEventData.beaconProperties = HelperMethods_1.HelperMethods.mergeBeaconProperties(beaconProperties, findEventData.beaconProperties);
                 var appkey = '<NO KEY SET>';
                 if (config.appKey) {
                     Logger_1.Logger.debug('appKey in config.');
@@ -92,28 +103,28 @@ class AppAgent {
                         global.txn = new Transaction_1.Transaction({
                             version: process.env.AWS_LAMBDA_FUNCTION_VERSION,
                             appKey: appkey || '',
-                            transactionName: requestID,
-                            transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME,
-                            uniqueClientId: uuid
+                            transactionName: process.env.AWS_LAMBDA_FUNCTION_NAME,
+                            transactionType: 'Lambda',
+                            uniqueClientId: requestID
                         }, findEventData.beaconProperties);
                     }
                     else if (findHeader.headersFound) {
                         global.txn = new Transaction_1.Transaction({
                             version: process.env.AWS_LAMBDA_FUNCTION_VERSION,
                             appKey: appkey || '',
-                            transactionName: requestID,
-                            transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME,
-                            uniqueClientId: uuid
+                            transactionName: process.env.AWS_LAMBDA_FUNCTION_NAME,
+                            transactionType: 'Lambda',
+                            uniqueClientId: requestID
                         }, findHeader.beaconProperties);
                     }
                     else {
                         global.txn = new Transaction_1.Transaction({
                             version: process.env.AWS_LAMBDA_FUNCTION_VERSION,
                             appKey: appkey || '',
-                            transactionName: requestID,
-                            transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME,
-                            uniqueClientId: uuid
-                        });
+                            transactionName: process.env.AWS_LAMBDA_FUNCTION_NAME,
+                            transactionType: 'Lambda',
+                            uniqueClientId: requestID
+                        }, beaconProperties);
                     }
                 }
                 else {
