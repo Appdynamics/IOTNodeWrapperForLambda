@@ -27,6 +27,8 @@ class ExitCall {
     //Overloading this method
     stop(responseProperties?: NetworkResponseProperties | BeaconProperties, properties?: BeaconProperties | NetworkResponseProperties) {
 
+        Logger.debug("dsm::ExitCall::stop start")
+
         if(this.timer.end_process_time) {
             Logger.warn(`Already called stop on exit call.`);
             return;
@@ -44,11 +46,13 @@ class ExitCall {
         if (beacon) {
             this.iot.sendBeacon(beacon);
         }
+        Logger.debug("dsm::ExitCall::stop stop")
     }
 
 
     createTimingBeacon(responseProperties: NetworkResponseProperties | undefined, properties: BeaconProperties | undefined): IOTBeacon | undefined {
 
+        Logger.debug("dsm::ExitCall::createTimingBeacon start")
         const beacon: IOTBeacon = {
             deviceInfo: this.config.deviceInfo,
             versionInfo: this.config.versionInfo
@@ -102,10 +106,12 @@ class ExitCall {
             beacon.customEvents = [customevent];
         }
 
+        Logger.debug("dsm::ExitCall::createTimingBeacon end")
         return beacon;
     }
     reportError(errorevent: ErrorEvent, properties?: BeaconProperties) {
 
+        Logger.debug("dsm::ExitCall::reportError start")
         const now = new Date();
         const beacon: IOTBeacon = {
             deviceInfo: this.config.deviceInfo,
@@ -119,6 +125,7 @@ class ExitCall {
         if (this.iot) {
             this.iot.sendBeacon(beacon);
         }
+        Logger.debug("dsm::ExitCall::reportError end")
     }
 
 

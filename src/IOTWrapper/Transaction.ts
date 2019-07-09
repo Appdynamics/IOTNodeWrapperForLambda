@@ -16,6 +16,7 @@ class Transaction {
     beaconProperties: BeaconProperties;
 
     constructor(config: TransactionConfiguration, beaconProperties? : BeaconProperties) {
+        Logger.debug("dsm::Transaction::ctor start")
         this.config = config;
         var cust_config = config;
         this.isValid = true;
@@ -63,9 +64,11 @@ class Transaction {
             appKey: this.config.appKey,
             collector: this.config.collector as string
         });
+        Logger.debug("dsm::Transaction::ctor end")
     }
 
     customData(properties?: BeaconProperties) {
+        Logger.debug("dsm::Transaction::customData start")
         if(!properties){
             return;
         }
@@ -79,9 +82,11 @@ class Transaction {
         this.beaconProperties.doubleProperties  = {...dp, ...properties.doubleProperties }
         this.beaconProperties.datetimeProperties  = {...dtp, ...properties.datetimeProperties }
 
+        Logger.debug("dsm::Transaction::customData end")
     }
 
     stop(properties?: BeaconProperties) {
+        Logger.debug("dsm::Transaction::stop start")
         if(this.timer.end_process_time) {
             Logger.warn('Already called stop on transaction.')
             return;
@@ -91,8 +96,10 @@ class Transaction {
         if (this.isValid && beacon && this.iot) {
             this.iot.sendBeacon(beacon);
         }
+        Logger.debug("dsm::Transaction::stop stop")
     }
     reportError(errorevent: ErrorEvent, properties?: BeaconProperties) {
+        Logger.debug("dsm::Transaction::reportError start")
         if (this.isValid) {
             const now = new Date();
             const beacon: IOTBeacon = {
@@ -126,9 +133,11 @@ class Transaction {
             Logger.error(`Transaction not valid.  Exit call not created`);
         }
 
+        Logger.debug("dsm::Transaction::reportError end")
     }
 
     createTimingBeacon(properties: BeaconProperties): IOTBeacon | undefined {
+        Logger.debug("dsm::Transaction::createTimingBeacon start")
         if (this.isValid) {
             const beacon: IOTBeacon = {
                 deviceInfo: {
@@ -160,12 +169,15 @@ class Transaction {
             }
             ///customevent = HelperMethods.setPropertiesOnEvent(customevent, properties) as CustomEvent;
             beacon.customEvents = [customevent];
+            Logger.debug("dsm::Transaction::createTimingBeacon end")
             return beacon;
         } else {
+            Logger.debug("dsm::Transaction::createTimingBeacon end")
             return undefined;
         }
     }
     createCustomExitCall(type: string, stringProperties: StringMap) {
+        Logger.debug("dsm::Transaction::createCustomExitCall start")
         if (this.isValid) {
             const exitcall = new ExitCall(this.iot as IOT, type, {
                 deviceInfo: {
@@ -179,12 +191,15 @@ class Transaction {
                 stringProperties: HelperMethods.setStringPropertiesTogether(this.beaconProperties.stringProperties as StringMap, stringProperties as StringMap),
                 uniqueClientId: this.config.uniqueClientId as string
             });
+            Logger.debug("dsm::Transaction::createCustomExitCall end")
             return exitcall;
         } else {
             Logger.error(`Transaction not valid.  Exit call not created`);
         }
+        Logger.debug("dsm::Transaction::createCustomExitCall end")
     }
     createHTTPExitCall(networkRequestProperties: NetworkRequestEvent, stringProperties: StringMap) {
+        Logger.debug("dsm::Transaction::createHTTPExitCall start")
         if (this.isValid) {
             const exitCall: ExitCall = new ExitCall(this.iot as IOT, "HTTP", {
                 deviceInfo: {
@@ -199,10 +214,12 @@ class Transaction {
                 networkRequestProperties: networkRequestProperties,
                 uniqueClientId: this.config.uniqueClientId as string
             });
+            Logger.debug("dsm::Transaction::createHTTPExitCall end")
             return exitCall;
         } else {
             Logger.error(`Transaction not valid.  Exit call not created`);
         }
+        Logger.debug("dsm::Transaction::createHTTPExitCall start")
     }
 
 }

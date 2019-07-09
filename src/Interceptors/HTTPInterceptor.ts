@@ -5,14 +5,18 @@ import { BeaconProperties} from '../index';
 import { HelperMethods } from '../Helpers/HelperMethods';
 class HTTPInterceptor {
     static init() {
+        Logger.debug("dsm::HTTPInterceptor::init")
         const originalRequest = http.request;
         // override the function
         http.request = function wrapMethodRequest(req: any) {
+            Logger.debug("dsm::HTTPInterceptor::wrapMethodRequest start")
             if (req.host && req.host.indexOf("amazonaws") >= 0) {
+                Logger.debug("dsm::HTTPInterceptor::amazonaws exit")
                 return originalRequest.apply(this, arguments as any );
             }
             //appdynamics request ignore
             if (req.hostname && req.hostname.indexOf("appdynamics") >= 0) {
+                Logger.debug("dsm::HTTPInterceptor::appdynamics exit")
                 return originalRequest.apply(this, arguments as any);
             }
 
@@ -44,27 +48,35 @@ class HTTPInterceptor {
                         if (http1) {
                             var findHeader = HelperMethods.findResponHeaderInformation(res);
                             if(findHeader.headersFound) {
+                                Logger.debug("dsm::HTTPInterceptor::http1 stop")
                                 http1.stop({
                                     statusCode: res.statusCode
                                 }, findHeader.beaconProperties.stringProperties);
 
                             } else {
+                                Logger.debug("dsm::HTTPInterceptor::http1 stop2")
                                 http1.stop({
                                     statusCode: res.statusCode
                                 });
                             }
-
                         }
+                        Logger.debug("dsm::HTTPInterceptor::anonold start")
                         anonold(res);
+                        Logger.debug("dsm::HTTPInterceptor::anonold end")
                     };
                     args[1] = onRes;
                 } catch (err) {
                     Logger.debug('Problem Building Interceptor. Defaulting to original request.');
+                    Logger.error(err)
                     return originalRequest.apply(this, arguments as any);
                 }
 
+                Logger.debug("dsm::HTTPInterceptor::originalRequest.apply start")
                 var oldreq = originalRequest.apply(this, args);
+                Logger.debug("dsm::HTTPInterceptor::originalRequest.apply end")
                 oldreq.on('error', (e: any) => {
+                    Logger.debug("dsm::HTTPInterceptor::oldreq on error")
+                    Logger.error(e)
                     if (http1) {
                         http1.reportError({
                             name: 'HTTP Error',
@@ -83,6 +95,7 @@ class HTTPInterceptor {
             }
 
 
+            Logger.debug("dsm::HTTPInterceptor::wrapMethodRequest end before apply")
             return originalRequest.apply(this, arguments as any);
         }
     }
