@@ -5,6 +5,7 @@ export interface IOTConfig {
     appKey: string;
     collector: string;
 }
+
 export interface IOTBeacon {
     deviceInfo: DeviceInfo;
     versionInfo?: VersionInfo;
@@ -12,17 +13,18 @@ export interface IOTBeacon {
     networkRequestEvents?: [NetworkRequestEvent];
     errorEvents?: [ErrorEvent];
 }
+
 export interface DeviceInfo {
     deviceName?: string;
     deviceType: string;
     deviceId: string;
 }
+
 export interface VersionInfo {
     hardwareVersion?: string;
     firmwareVersion?: string;
     softwareVersion?: string;
     opteratingSytemVersion?: string;
-
 }
 
 export interface Event {
@@ -32,8 +34,8 @@ export interface Event {
     booleanProperties?: BooleanMap;
     doubleProperties?: NumberMap;
     datetimeProperties?: NumberMap;
-
 }
+
 export interface BeaconProperties {
     [key: string]: string | number | StringMap | undefined | BooleanMap | NumberMap | boolean;
     /*A map of the string properties of this event. There cannot be more than 16 string properties per event. Entry keys have a max length of 24 characters. Entry values have a max length of 128 characters. Entry keys cannot contain the pipe character '|'. Valid Examples: { "username": "john.doe" }*/
@@ -45,6 +47,7 @@ export interface BeaconProperties {
     /*A map of the datetime properties of this event, in millisecond epoch time. There cannot be more than 16 datetime properties per event. Entry keys have a max length of 24 characters. Entry keys cannot contain the pipe character '|'. Valid Examples: { "bootTime": 1487119625012 }*/
     datetimeProperties?: NumberMap;
 }
+
 export interface StringMap {
     [propName: string]: string;
 }
@@ -52,6 +55,7 @@ export interface StringMap {
 export interface BooleanMap {
     [propName: string]: boolean;
 }
+
 export interface NumberMap {
     [propName: string]: number;
 }
@@ -59,14 +63,17 @@ export interface NumberMap {
 export interface DataTypeMap {
     [propeName: string]: DataType;
 }
+
 export interface ExitCallMap {
     [propName: string]: ExitCall;
 }
+
 export interface CustomEvent extends Event {
     eventType: string;
     eventSummary: string;
 
 }
+
 export interface NetworkRequestEvent extends Event {
     [key: string]: string | number | StringMap | undefined | BooleanMap | NumberMap | ResponseHeaders;
     url: string;
@@ -77,9 +84,11 @@ export interface NetworkRequestEvent extends Event {
     responseHeaders?: ResponseHeaders; //TODO, better way to fix headers?
 
 }
+
 export interface ResponseHeaders {
     [propName: string]: [string];
 }
+
 export interface NetworkResponseProperties {
     [key: string]: string | number | StringMap | undefined;
     statusCode?: number;
@@ -88,14 +97,15 @@ export interface NetworkResponseProperties {
     responseContentLength?: number;
     responseHeaders?: StringMap;
 }
+
 export interface ErrorEvent extends Event {
     name: string;
     message?: string;
     stackTraces?: [stackTrace];
     errorStackTraceIndex?: number;
     severity?: Severity
-
 }
+
 export declare enum Severity {
     ALERT = "alert",
     CRITICAL = "critical",
@@ -105,8 +115,8 @@ export interface stackTrace {
     thread?: string;
     runtime?: Runtime;
     stackFrames?: [StackFrame]
-
 }
+
 export interface StackFrame {
     symbolName?: string;
     packageName?: string;
@@ -116,13 +126,14 @@ export interface StackFrame {
     imageOffset?: number;
     symbolOffset?: number;
 }
+
 export enum DataType {
     STRING = "string",
     DATETIME = "datetime",
     BOOLEAN = "boolean",
     DOUBLE = "double"
-
 }
+
 declare enum Runtime {
     NATIVE = "native",
     JAVA = "java",
@@ -131,6 +142,7 @@ declare enum Runtime {
     DOTNET = ".net",
     NODEJS = "node.js"
 }
+
 export interface ExitCallConfiguration {
     stringProperties?: StringMap;
     networkRequestProperties?: NetworkRequestEvent;
@@ -148,7 +160,6 @@ export interface TransactionConfiguration {
     uniqueClientId: string;
     lambdaHeaders?: StringMap;
 }
-
 
 export interface AppConfig {
     /*App Key to IOT Application in AppDynamics*/
@@ -175,11 +186,12 @@ export enum LOGLEVEL {
     WARN = 3,
     ERROR = 4, 
     OFF = 5
-
 }
+
 declare global {
     namespace NodeJS {
         interface Global {
+            appdynamicsLambdaTransaction: any // make statically typed to LambdaTransaction
             txn: Transaction
             AppConfig: AppConfig
         }

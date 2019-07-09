@@ -2,6 +2,7 @@ import https = require('https');
 import { IOTConfig, IOTBeacon } from "../index"
 import { HelperMethods } from "../Helpers/HelperMethods"
 import { Logger } from "../Helpers/Logger"
+
 class IOT {
 
     config: IOTConfig;
@@ -11,12 +12,14 @@ class IOT {
 
     constructor(config: IOTConfig) {
         this.config = config;
+        // this shouldn't get this far
         if(this.config.appKey === '<NO KEY SET>') {
             this.isValid = false;
             Logger.warn('Appkey is not set, no beacons will be sent.');
         }
         this.path = `/eumcollector/iot/v1/application/${this.config.appKey}/beacons`;
     }
+
     sendBeaconSync(beacon: IOTBeacon) {
         const options: https.RequestOptions = {
             hostname: this.config.collector,
@@ -31,12 +34,12 @@ class IOT {
             req.on('error', function (e) {
                 Logger.error('problem with request: ' + e.message);
             });
-
         });
         const json = JSON.stringify(beacon);
         req.write(`[${json}]`);
         req.end();
     }
+
     async sendBeaconAsync(beacon: IOTBeacon): Promise<any> {
         const options: https.RequestOptions = {
             hostname: this.config.collector,
@@ -53,22 +56,20 @@ class IOT {
                 Logger.info(`Beacon Status Code: ${res.statusCode}`);
                 resolve('Success');
             });
+            // inconsistent ways of handling error event
             req.on('error', (err) => reject(err));
-
             const json = JSON.stringify(beacon);
             req.write(`[${json}]`);
             req.end();
-            
-  
-
         });
-
     }
      sendBeacon(beacon: IOTBeacon) {
+        // should have debug logging
         if(this.sync && this.isValid) {
             this.sendBeaconSync(beacon);
         } else if (this.isValid){
-            this.sendBeaconAsync(beacon).catch((err) => { Logger.error(JSON.stringify(err))});
+            this.sendBeaconAsync(beacon)
+                .catch((err) => { Logger.error(JSON.stringify(err))});
         }
     }
 }

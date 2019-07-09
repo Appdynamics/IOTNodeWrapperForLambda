@@ -29,10 +29,14 @@ class Transaction {
             doubleProperties: {}
             
         }
+
+        // this always evaluates to true? oh wait this is the incoming parameter...
+        // if props provided add to customData
         if(beaconProperties){
             this.customData(beaconProperties);
         }
 
+        // if required parameters are not set exit
         if (!HelperMethods.isValid(cust_config, 'transactionName')) {
             this.isValid = false;
             Logger.error(`Invalid or missing transactionName`)
@@ -43,11 +47,13 @@ class Transaction {
             Logger.error(`Invalid or missing transactionType`)
             return;
         }
+
         if(cust_config.transactionType.length > 24) {
             cust_config.transactionType = cust_config.transactionType.substring(0,23);
             Logger.warn(`transactionType longer than 24 characters.  truncating to: ${cust_config.transactionType}`);
         }
 
+        // why is this after the transactionType check..?
         if (!HelperMethods.isValid(cust_config, 'appKey')) {
             Logger.error(`Invalid or missing appKey`);
             this.isValid = false;
@@ -74,11 +80,11 @@ class Transaction {
         var dp:NumberMap = this.beaconProperties.doubleProperties as NumberMap;
         var dtp:NumberMap = this.beaconProperties.datetimeProperties as NumberMap;
 
+        // will this handle duplicates properly or would an error occur?
         this.beaconProperties.stringProperties  = {...sp, ...properties.stringProperties }
         this.beaconProperties.booleanProperties  = {...bp, ...properties.booleanProperties }
         this.beaconProperties.doubleProperties  = {...dp, ...properties.doubleProperties }
         this.beaconProperties.datetimeProperties  = {...dtp, ...properties.datetimeProperties }
-
     }
 
     stop(properties?: BeaconProperties) {
@@ -92,7 +98,10 @@ class Transaction {
             this.iot.sendBeacon(beacon);
         }
     }
+
     reportError(errorevent: ErrorEvent, properties?: BeaconProperties) {
+        // todo add logging throughout
+        // why wouldn't this be valid?
         if (this.isValid) {
             const now = new Date();
             const beacon: IOTBeacon = {
@@ -125,7 +134,6 @@ class Transaction {
         } else {
             Logger.error(`Transaction not valid.  Exit call not created`);
         }
-
     }
 
     createTimingBeacon(properties: BeaconProperties): IOTBeacon | undefined {
@@ -165,6 +173,7 @@ class Transaction {
             return undefined;
         }
     }
+
     createCustomExitCall(type: string, stringProperties: StringMap) {
         if (this.isValid) {
             const exitcall = new ExitCall(this.iot as IOT, type, {
@@ -184,6 +193,7 @@ class Transaction {
             Logger.error(`Transaction not valid.  Exit call not created`);
         }
     }
+
     createHTTPExitCall(networkRequestProperties: NetworkRequestEvent, stringProperties: StringMap) {
         if (this.isValid) {
             const exitCall: ExitCall = new ExitCall(this.iot as IOT, "HTTP", {
@@ -204,7 +214,6 @@ class Transaction {
             Logger.error(`Transaction not valid.  Exit call not created`);
         }
     }
-
 }
 
 export { Transaction }; 

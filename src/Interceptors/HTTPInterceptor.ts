@@ -1,8 +1,8 @@
-
 import http = require('http');
 import { Logger } from '../Helpers/Logger';
 import { BeaconProperties} from '../index';
 import { HelperMethods } from '../Helpers/HelperMethods';
+
 class HTTPInterceptor {
     static init() {
         const originalRequest = http.request;
@@ -81,7 +81,6 @@ class HTTPInterceptor {
             } else {
                 Logger.warn("global.txn is not defined, skipping interception of HTTP exit call.");
             }
-
 
             return originalRequest.apply(this, arguments as any);
         }
