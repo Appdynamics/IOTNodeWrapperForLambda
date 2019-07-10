@@ -82,7 +82,10 @@ class Transaction {
     }
     reportError(errorevent, properties) {
         Logger_1.Logger.debug("dsm::Transaction::reportError start");
+        Logger_1.Logger.debug(errorevent);
+        Logger_1.Logger.debug(properties);
         if (this.isValid) {
+            Logger_1.Logger.debug("dsm::Transaction::reportError isValid");
             const now = new Date();
             const beacon = {
                 deviceInfo: {
@@ -101,11 +104,22 @@ class Transaction {
                 eventType: this.config.transactionType,
                 uniqueClientId: this.config.uniqueClientId
             };
+            Logger_1.Logger.debug("dsm::Transaction::reportError a");
             this.customData(properties);
+            Logger_1.Logger.debug("dsm::Transaction::reportError b");
             err = HelperMethods_1.HelperMethods.setPropertiesOnEvent(err, this.beaconProperties);
+            Logger_1.Logger.debug("dsm::Transaction::reportError c");
             beacon.errorEvents = [err];
+            Logger_1.Logger.debug("dsm::Transaction::reportError d");
+            Logger_1.Logger.debug('dsm::Transaction::reportError::iot');
+            Logger_1.Logger.debug(this.iot);
+            Logger_1.Logger.debug('dsm::Transaction::reportError::beacon');
+            Logger_1.Logger.debug(beacon);
             if (this.iot) {
+                Logger_1.Logger.debug("dsm::Transaction::reportError e");
+                Logger_1.Logger.debug("dsm::Transaction::reportError this.iot");
                 this.iot.sendBeacon(beacon);
+                Logger_1.Logger.debug("dsm::Transaction::reportError f");
             }
         }
         else {

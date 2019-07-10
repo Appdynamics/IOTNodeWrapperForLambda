@@ -30,17 +30,23 @@ class IOT {
             path: this.path,
             method: 'POST'
         };
+        Logger_1.Logger.debug('dsm::IOT::sendBeaconSync options' + options);
         Logger_1.Logger.debug('IOT Beacon:');
-        Logger_1.Logger.debug(JSON.stringify(beacon));
+        const json = JSON.stringify(beacon);
+        Logger_1.Logger.debug(json);
+        Logger_1.Logger.debug('dsm::IOT::sendBeaconSync https.request 0');
         const req = https.request(options, function (res) {
+            Logger_1.Logger.debug('dsm::IOT::sendBeaconSync https.request');
             req.on('error', function (e) {
                 Logger_1.Logger.error(e);
                 Logger_1.Logger.error('problem with request: ' + e.message);
             });
         });
-        const json = JSON.stringify(beacon);
+        Logger_1.Logger.debug('dsm::IOT::sendBeaconSync https.request a');
         req.write(`[${json}]`);
+        Logger_1.Logger.debug('dsm::IOT::sendBeaconSync https.request b');
         req.end();
+        Logger_1.Logger.debug('dsm::IOT::sendBeaconSync https.request c');
         Logger_1.Logger.debug('dsm::IOT::sendBeaconSync end');
     }
     sendBeaconAsync(beacon) {
@@ -52,23 +58,30 @@ class IOT {
                 path: this.path,
                 method: 'POST'
             };
+            Logger_1.Logger.debug('dsm::IOT::sendBeaconAsync options' + options);
             Logger_1.Logger.debug('-=-=-=-=-=-=-=-  IOT Beacon -=-=-=-=-=-=-=-=');
             Logger_1.Logger.debug(JSON.stringify(beacon));
             // return new pending promise
             return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
                 Logger_1.Logger.debug('dsm::IOT::sendBeaconAsync promise start');
                 const req = https.request(options, function (res) {
+                    Logger_1.Logger.debug('dsm::IOT::sendBeaconAsync a');
                     Logger_1.Logger.debug('dsm::IOT::request success');
                     Logger_1.Logger.info(`Beacon Status Code: ${res.statusCode}`);
                     resolve('Success');
                 });
                 req.on('error', (err) => function () {
+                    Logger_1.Logger.debug('dsm::IOT::sendBeaconAsync b');
                     Logger_1.Logger.error(err);
                     reject(err);
                 });
+                Logger_1.Logger.debug('dsm::IOT::sendBeaconAsync c');
                 const json = JSON.stringify(beacon);
+                Logger_1.Logger.debug('dsm::IOT::sendBeaconAsync d');
                 req.write(`[${json}]`);
+                Logger_1.Logger.debug('dsm::IOT::sendBeaconAsync e');
                 req.end();
+                Logger_1.Logger.debug('dsm::IOT::sendBeaconAsync f');
                 Logger_1.Logger.debug('dsm::IOT::sendBeaconAsync end');
             }));
         });

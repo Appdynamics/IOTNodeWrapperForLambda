@@ -167,7 +167,7 @@ class AppAgent {
 
                 if (instrumentationenabled) {
                     process.once('beforeExit', function () {
-
+                        // this never gets hit, there for ".stop" is never called
                         Logger.debug('dsm::beforeExit')
                         //if the transaction hasn't been stopped (like in an exception) send the data
                         if (global.txn && global.txn.iot && global.txn.timer && !global.txn.timer.end_process_time) {
@@ -253,11 +253,16 @@ class AppAgent {
 
                             } else if (arguments && arguments[1]) {
                                 Logger.debug('dsm::newcallback.arguments[1]')
+                                // if a response object was provided, we want to inspect it and if it's an error report it
                                 var res = arguments[1]
-                                //Normal Error status codes
+                                Logger.debug(res)
+                                // Normal Error status codes
+                                // note if res isn't in this object formater it will error
                                 if (res.statusCode && (res.statusCode >= 400 && res.statusCode < 600)) {
                                     var body: string = (res.body) ? res.body : JSON.stringify(res);
+                                    Logger.debug(body)
                                     if (global.txn) {
+                                        // dsm bug is getting here
                                         global.txn.reportError({
                                             name: res.statusCode.toString(),
                                             message: body as string

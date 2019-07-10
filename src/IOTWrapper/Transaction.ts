@@ -100,7 +100,10 @@ class Transaction {
     }
     reportError(errorevent: ErrorEvent, properties?: BeaconProperties) {
         Logger.debug("dsm::Transaction::reportError start")
+        Logger.debug(errorevent)
+        Logger.debug(properties)
         if (this.isValid) {
+            Logger.debug("dsm::Transaction::reportError isValid")
             const now = new Date();
             const beacon: IOTBeacon = {
                 deviceInfo: {
@@ -122,12 +125,23 @@ class Transaction {
                 eventType: this.config.transactionType,
                 uniqueClientId: this.config.uniqueClientId as string
             }
+            Logger.debug("dsm::Transaction::reportError a")
             this.customData(properties);
+            Logger.debug("dsm::Transaction::reportError b")
             err = HelperMethods.setPropertiesOnEvent(err, this.beaconProperties) as ErrorEvent;
+            Logger.debug("dsm::Transaction::reportError c")
 
             beacon.errorEvents = [err];
+            Logger.debug("dsm::Transaction::reportError d")
+            Logger.debug('dsm::Transaction::reportError::iot');
+            Logger.debug(this.iot)
+            Logger.debug('dsm::Transaction::reportError::beacon');
+            Logger.debug(beacon);
             if (this.iot) {
+                Logger.debug("dsm::Transaction::reportError e")
+                Logger.debug("dsm::Transaction::reportError this.iot")
                 this.iot.sendBeacon(beacon);
+                Logger.debug("dsm::Transaction::reportError f")
             }
         } else {
             Logger.error(`Transaction not valid.  Exit call not created`);
