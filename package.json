@@ -1,16 +1,14 @@
 {
   "name": "@appdynamicsnodelambda/nodelambda",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Use the AppDynamics IOT Agent to configure nodeJS lambda timings",
   "main": "appdynamics/AppAgent.js",
   "types": "appdynamics/index.d.ts",
   "author": "Michael Sickles",
   "license": "ISC",
-  "dependencies": {
-    "@types/node": "^10.12.10"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "@types/node": "^10.12.10",
-    "typescript": "^3.5.2"
+    "@types/node": "^10.14.12",
+    "typescript": "^3.5.3"
   }
 }

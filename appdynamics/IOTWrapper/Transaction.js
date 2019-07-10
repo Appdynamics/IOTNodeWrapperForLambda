@@ -8,6 +8,7 @@ const Logger_1 = require("../Helpers/Logger");
 class Transaction {
     constructor(config, beaconProperties) {
         this.version = "1.0.1";
+        Logger_1.Logger.debug("dsm::Transaction::ctor start");
         this.config = config;
         var cust_config = config;
         this.isValid = true;
@@ -49,8 +50,10 @@ class Transaction {
             appKey: this.config.appKey,
             collector: this.config.collector
         });
+        Logger_1.Logger.debug("dsm::Transaction::ctor end");
     }
     customData(properties) {
+        Logger_1.Logger.debug("dsm::Transaction::customData start");
         if (!properties) {
             return;
         }
@@ -62,8 +65,10 @@ class Transaction {
         this.beaconProperties.booleanProperties = Object.assign({}, bp, properties.booleanProperties);
         this.beaconProperties.doubleProperties = Object.assign({}, dp, properties.doubleProperties);
         this.beaconProperties.datetimeProperties = Object.assign({}, dtp, properties.datetimeProperties);
+        Logger_1.Logger.debug("dsm::Transaction::customData end");
     }
     stop(properties) {
+        Logger_1.Logger.debug("dsm::Transaction::stop start");
         if (this.timer.end_process_time) {
             Logger_1.Logger.warn('Already called stop on transaction.');
             return;
@@ -73,8 +78,10 @@ class Transaction {
         if (this.isValid && beacon && this.iot) {
             this.iot.sendBeacon(beacon);
         }
+        Logger_1.Logger.debug("dsm::Transaction::stop stop");
     }
     reportError(errorevent, properties) {
+        Logger_1.Logger.debug("dsm::Transaction::reportError start");
         if (this.isValid) {
             const now = new Date();
             const beacon = {
@@ -104,8 +111,10 @@ class Transaction {
         else {
             Logger_1.Logger.error(`Transaction not valid.  Exit call not created`);
         }
+        Logger_1.Logger.debug("dsm::Transaction::reportError end");
     }
     createTimingBeacon(properties) {
+        Logger_1.Logger.debug("dsm::Transaction::createTimingBeacon start");
         if (this.isValid) {
             const beacon = {
                 deviceInfo: {
@@ -137,13 +146,16 @@ class Transaction {
             }
             ///customevent = HelperMethods.setPropertiesOnEvent(customevent, properties) as CustomEvent;
             beacon.customEvents = [customevent];
+            Logger_1.Logger.debug("dsm::Transaction::createTimingBeacon end");
             return beacon;
         }
         else {
+            Logger_1.Logger.debug("dsm::Transaction::createTimingBeacon end");
             return undefined;
         }
     }
     createCustomExitCall(type, stringProperties) {
+        Logger_1.Logger.debug("dsm::Transaction::createCustomExitCall start");
         if (this.isValid) {
             const exitcall = new ExitCall_1.ExitCall(this.iot, type, {
                 deviceInfo: {
@@ -157,13 +169,16 @@ class Transaction {
                 stringProperties: HelperMethods_1.HelperMethods.setStringPropertiesTogether(this.beaconProperties.stringProperties, stringProperties),
                 uniqueClientId: this.config.uniqueClientId
             });
+            Logger_1.Logger.debug("dsm::Transaction::createCustomExitCall end");
             return exitcall;
         }
         else {
             Logger_1.Logger.error(`Transaction not valid.  Exit call not created`);
         }
+        Logger_1.Logger.debug("dsm::Transaction::createCustomExitCall end");
     }
     createHTTPExitCall(networkRequestProperties, stringProperties) {
+        Logger_1.Logger.debug("dsm::Transaction::createHTTPExitCall start");
         if (this.isValid) {
             const exitCall = new ExitCall_1.ExitCall(this.iot, "HTTP", {
                 deviceInfo: {
@@ -178,11 +193,13 @@ class Transaction {
                 networkRequestProperties: networkRequestProperties,
                 uniqueClientId: this.config.uniqueClientId
             });
+            Logger_1.Logger.debug("dsm::Transaction::createHTTPExitCall end");
             return exitCall;
         }
         else {
             Logger_1.Logger.error(`Transaction not valid.  Exit call not created`);
         }
+        Logger_1.Logger.debug("dsm::Transaction::createHTTPExitCall start");
     }
 }
 exports.Transaction = Transaction;

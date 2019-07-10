@@ -5,14 +5,18 @@ const Logger_1 = require("../Helpers/Logger");
 const HelperMethods_1 = require("../Helpers/HelperMethods");
 class HTTPInterceptor {
     static init() {
+        Logger_1.Logger.debug("dsm::HTTPInterceptor::init");
         const originalRequest = http.request;
         // override the function
         http.request = function wrapMethodRequest(req) {
+            Logger_1.Logger.debug("dsm::HTTPInterceptor::wrapMethodRequest start");
             if (req.host && req.host.indexOf("amazonaws") >= 0) {
+                Logger_1.Logger.debug("dsm::HTTPInterceptor::amazonaws exit");
                 return originalRequest.apply(this, arguments);
             }
             //appdynamics request ignore
             if (req.hostname && req.hostname.indexOf("appdynamics") >= 0) {
+                Logger_1.Logger.debug("dsm::HTTPInterceptor::appdynamics exit");
                 return originalRequest.apply(this, arguments);
             }
             if (global.txn) {
@@ -43,26 +47,35 @@ class HTTPInterceptor {
                         if (http1) {
                             var findHeader = HelperMethods_1.HelperMethods.findResponHeaderInformation(res);
                             if (findHeader.headersFound) {
+                                Logger_1.Logger.debug("dsm::HTTPInterceptor::http1 stop");
                                 http1.stop({
                                     statusCode: res.statusCode
                                 }, findHeader.beaconProperties.stringProperties);
                             }
                             else {
+                                Logger_1.Logger.debug("dsm::HTTPInterceptor::http1 stop2");
                                 http1.stop({
                                     statusCode: res.statusCode
                                 });
                             }
                         }
+                        Logger_1.Logger.debug("dsm::HTTPInterceptor::anonold start");
                         anonold(res);
+                        Logger_1.Logger.debug("dsm::HTTPInterceptor::anonold end");
                     };
                     args[1] = onRes;
                 }
                 catch (err) {
                     Logger_1.Logger.debug('Problem Building Interceptor. Defaulting to original request.');
+                    Logger_1.Logger.error(err);
                     return originalRequest.apply(this, arguments);
                 }
+                Logger_1.Logger.debug("dsm::HTTPInterceptor::originalRequest.apply start");
                 var oldreq = originalRequest.apply(this, args);
+                Logger_1.Logger.debug("dsm::HTTPInterceptor::originalRequest.apply end");
                 oldreq.on('error', (e) => {
+                    Logger_1.Logger.debug("dsm::HTTPInterceptor::oldreq on error");
+                    Logger_1.Logger.error(e);
                     if (http1) {
                         http1.reportError({
                             name: 'HTTP Error',
@@ -79,6 +92,7 @@ class HTTPInterceptor {
             else {
                 Logger_1.Logger.warn("global.txn is not defined, skipping interception of HTTP exit call.");
             }
+            Logger_1.Logger.debug("dsm::HTTPInterceptor::wrapMethodRequest end before apply");
             return originalRequest.apply(this, arguments);
         };
     }

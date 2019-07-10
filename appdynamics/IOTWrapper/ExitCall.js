@@ -22,6 +22,7 @@ class ExitCall {
     }
     //Overloading this method
     stop(responseProperties, properties) {
+        Logger_1.Logger.debug("dsm::ExitCall::stop start");
         if (this.timer.end_process_time) {
             Logger_1.Logger.warn(`Already called stop on exit call.`);
             return;
@@ -40,8 +41,10 @@ class ExitCall {
         if (beacon) {
             this.iot.sendBeacon(beacon);
         }
+        Logger_1.Logger.debug("dsm::ExitCall::stop stop");
     }
     createTimingBeacon(responseProperties, properties) {
+        Logger_1.Logger.debug("dsm::ExitCall::createTimingBeacon start");
         const beacon = {
             deviceInfo: this.config.deviceInfo,
             versionInfo: this.config.versionInfo
@@ -93,9 +96,11 @@ class ExitCall {
             customevent = HelperMethods_1.HelperMethods.setPropertiesOnEvent(customevent, properties);
             beacon.customEvents = [customevent];
         }
+        Logger_1.Logger.debug("dsm::ExitCall::createTimingBeacon end");
         return beacon;
     }
     reportError(errorevent, properties) {
+        Logger_1.Logger.debug("dsm::ExitCall::reportError start");
         const now = new Date();
         const beacon = {
             deviceInfo: this.config.deviceInfo,
@@ -109,6 +114,7 @@ class ExitCall {
         if (this.iot) {
             this.iot.sendBeacon(beacon);
         }
+        Logger_1.Logger.debug("dsm::ExitCall::reportError end");
     }
 }
 exports.ExitCall = ExitCall;
