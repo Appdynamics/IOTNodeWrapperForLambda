@@ -16,6 +16,6 @@ declare class Transaction {
     reportError(errorevent: ErrorEvent, properties?: BeaconProperties): void;
     createTimingBeacon(properties: BeaconProperties): IOTBeacon | undefined;
     createCustomExitCall(type: string, stringProperties: StringMap): ExitCall | undefined;
-    createHTTPExitCall(networkRequestProperties: NetworkRequestEvent, stringProperties: StringMap): ExitCall | undefined;
+    createHTTPExitCall(networkRequestProperties: NetworkRequestEvent, stringProperties?: StringMap): ExitCall | undefined;
 }
 export { Transaction };

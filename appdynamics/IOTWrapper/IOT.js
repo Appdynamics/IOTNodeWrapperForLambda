@@ -52,7 +52,6 @@ class IOT {
             // return new pending promise
             return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
                 const req = https.request(options, function (res) {
-                    Logger_1.Logger.info(`Beacon Status Code: ${res.statusCode}`);
                     resolve('Success');
                 });
                 req.on('error', (err) => reject(err));
@@ -67,7 +66,7 @@ class IOT {
             this.sendBeaconSync(beacon);
         }
         else if (this.isValid) {
-            this.sendBeaconAsync(beacon).catch((err) => { Logger_1.Logger.error(JSON.stringify(err)); });
+            this.sendBeaconAsync(beacon).catch((err) => { Logger_1.Logger.error(err); });
         }
     }
 }

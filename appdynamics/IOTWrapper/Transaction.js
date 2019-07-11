@@ -81,7 +81,7 @@ class Transaction {
                 deviceInfo: {
                     deviceName: this.config.transactionName,
                     deviceType: this.config.transactionType,
-                    deviceId: this.config.uniqueClientId
+                    deviceId: this.config.transactionName
                 },
                 versionInfo: {
                     softwareVersion: this.config.version
@@ -111,7 +111,7 @@ class Transaction {
                 deviceInfo: {
                     deviceName: this.config.transactionName,
                     deviceType: this.config.transactionType,
-                    deviceId: this.config.uniqueClientId
+                    deviceId: this.config.transactionName
                 },
                 versionInfo: {
                     softwareVersion: this.config.version
@@ -149,12 +149,12 @@ class Transaction {
                 deviceInfo: {
                     deviceName: this.config.transactionName,
                     deviceType: this.config.transactionType,
-                    deviceId: this.config.uniqueClientId
+                    deviceId: this.config.transactionName
                 },
                 versionInfo: {
                     softwareVersion: this.config.version
                 },
-                stringProperties: HelperMethods_1.HelperMethods.setStringPropertiesTogether(this.beaconProperties.stringProperties, stringProperties),
+                stringProperties: stringProperties,
                 uniqueClientId: this.config.uniqueClientId
             });
             return exitcall;
@@ -169,12 +169,12 @@ class Transaction {
                 deviceInfo: {
                     deviceName: this.config.transactionName,
                     deviceType: this.config.transactionType,
-                    deviceId: this.config.uniqueClientId
+                    deviceId: this.config.transactionName
                 },
                 versionInfo: {
                     softwareVersion: this.config.version
                 },
-                stringProperties: HelperMethods_1.HelperMethods.setStringPropertiesTogether(this.beaconProperties.stringProperties, stringProperties),
+                stringProperties: stringProperties,
                 networkRequestProperties: networkRequestProperties,
                 uniqueClientId: this.config.uniqueClientId
             });

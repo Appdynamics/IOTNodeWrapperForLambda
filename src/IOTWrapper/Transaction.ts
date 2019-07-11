@@ -99,7 +99,7 @@ class Transaction {
                 deviceInfo: {
                     deviceName: this.config.transactionName,
                     deviceType: this.config.transactionType,
-                    deviceId: this.config.uniqueClientId
+                    deviceId: this.config.transactionName
                 },
                 versionInfo: {
                     softwareVersion: this.config.version
@@ -134,7 +134,7 @@ class Transaction {
                 deviceInfo: {
                     deviceName: this.config.transactionName,
                     deviceType: this.config.transactionType,
-                    deviceId: this.config.uniqueClientId
+                    deviceId: this.config.transactionName
                 },
                 versionInfo: {
                     softwareVersion: this.config.version
@@ -171,12 +171,12 @@ class Transaction {
                 deviceInfo: {
                     deviceName: this.config.transactionName,
                     deviceType: this.config.transactionType,
-                    deviceId: this.config.uniqueClientId
+                    deviceId: this.config.transactionName
                 },
                 versionInfo: {
                     softwareVersion: this.config.version
                 },
-                stringProperties: HelperMethods.setStringPropertiesTogether(this.beaconProperties.stringProperties as StringMap, stringProperties as StringMap),
+                stringProperties: stringProperties,
                 uniqueClientId: this.config.uniqueClientId as string
             });
             return exitcall;
@@ -184,18 +184,18 @@ class Transaction {
             Logger.error(`Transaction not valid.  Exit call not created`);
         }
     }
-    createHTTPExitCall(networkRequestProperties: NetworkRequestEvent, stringProperties: StringMap) {
+    createHTTPExitCall(networkRequestProperties: NetworkRequestEvent, stringProperties?: StringMap) {
         if (this.isValid) {
             const exitCall: ExitCall = new ExitCall(this.iot as IOT, "HTTP", {
                 deviceInfo: {
                     deviceName: this.config.transactionName,
                     deviceType: this.config.transactionType,
-                    deviceId: this.config.uniqueClientId
+                    deviceId: this.config.transactionName
                 },
                 versionInfo: {
                     softwareVersion: this.config.version
                 },
-                stringProperties: HelperMethods.setStringPropertiesTogether(this.beaconProperties.stringProperties as StringMap, stringProperties),
+                stringProperties: stringProperties,
                 networkRequestProperties: networkRequestProperties,
                 uniqueClientId: this.config.uniqueClientId as string
             });

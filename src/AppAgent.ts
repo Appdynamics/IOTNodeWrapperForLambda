@@ -1,4 +1,4 @@
-import { AppConfig, BooleanMap, DataTypeMap, BeaconProperties } from "./index";
+import { AppConfig, BooleanMap, DataTypeMap } from "./index";
 import { Transaction } from "./IOTWrapper/Transaction";
 import { HTTPInterceptor } from "./Interceptors/HTTPInterceptor";
 import { AWSInterceptor } from "./Interceptors/AWSInterceptor";
@@ -52,26 +52,15 @@ class AppAgent {
                 var contextExists: boolean = true;
                 var callbackExists: boolean = true;
                 var requestID = '';
-                var beaconProperties: BeaconProperties = {
-                    stringProperties: {},
-                    doubleProperties: {},
-                    datetimeProperties: {},
-                    booleanProperties: {},
-                };
                 if (!context) {
                     Logger.warn('context not given in function, generating uuid');
                     contextExists = false;
                     requestID = (new Date()).getTime().toString();
                 } else {
                     requestID = context.awsRequestId;
-                    if(beaconProperties && beaconProperties.stringProperties) {
-                        beaconProperties.stringProperties['awsrequestid'] = requestID;
-                    }
                 }
-
-
                 if (config && config.uniqueIDHeader && event.headers && event.headers[config.uniqueIDHeader]) {
-                    requestID = event.headers[config.uniqueIDHeader];
+                    uuid = event.headers[config.uniqueIDHeader];
                 }
                 Logger.debug('Creating transaction');
                 global.AppConfig = config || {};
@@ -80,9 +69,6 @@ class AppAgent {
                 }
                 var findHeader = HelperMethods.findEventHeaderInformation(event);
                 var findEventData = HelperMethods.findEventDataInformation(event, findHeader.beaconProperties, config.eventData as DataTypeMap);
-                findHeader.beaconProperties = HelperMethods.mergeBeaconProperties(beaconProperties, findHeader.beaconProperties);
-                findEventData.beaconProperties = HelperMethods.mergeBeaconProperties(beaconProperties, findEventData.beaconProperties);
-
                 var appkey = '<NO KEY SET>';
                 if (config.appKey) {
                     Logger.debug('appKey in config.');
@@ -105,28 +91,28 @@ class AppAgent {
                         global.txn = new Transaction({
                             version: process.env.AWS_LAMBDA_FUNCTION_VERSION as string,
                             appKey: appkey || '',
-                            transactionName: process.env.AWS_LAMBDA_FUNCTION_NAME as string,
-                            transactionType: 'Lambda',
-                            uniqueClientId: requestID
+                            transactionName: requestID,
+                            transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME as string,
+                            uniqueClientId: uuid
                         }, findEventData.beaconProperties);
 
                     } else if (findHeader.headersFound) {
                         global.txn = new Transaction({
                             version: process.env.AWS_LAMBDA_FUNCTION_VERSION as string,
                             appKey: appkey || '',
-                            transactionName: process.env.AWS_LAMBDA_FUNCTION_NAME as string,
-                            transactionType: 'Lambda',
-                            uniqueClientId: requestID
+                            transactionName: requestID,
+                            transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME as string,
+                            uniqueClientId: uuid
                         }, findHeader.beaconProperties);
 
                     } else {
                         global.txn = new Transaction({
                             version: process.env.AWS_LAMBDA_FUNCTION_VERSION as string,
                             appKey: appkey || '',
-                            transactionName: process.env.AWS_LAMBDA_FUNCTION_NAME as string,
-                            transactionType: 'Lambda',
-                            uniqueClientId: requestID
-                        }, beaconProperties);
+                            transactionName: requestID,
+                            transactionType: process.env.AWS_LAMBDA_FUNCTION_NAME as string,
+                            uniqueClientId: uuid
+                        });
                     }
                 } else {
                     instrumentationenabled = false;
