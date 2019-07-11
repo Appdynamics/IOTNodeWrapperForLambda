@@ -4,8 +4,8 @@ class Logger {
 
 
     static appString = "Appdynamics";
-    static print(level:string, msg: string) {
-        console.log(`${this.appString}::${level}::${msg}`)
+    static print(level:string, msg: any) {
+        console.log(`${this.appString}::${level}::` + msg)
     }
     static init(level:string) {
         if(level) {
@@ -29,22 +29,22 @@ class Logger {
           
         }
     }
-    static debug(msg:string) {
+    static debug(msg:any) {
         if(LOGLEVEL.DEBUG >= this.level) {
             this.print('DEBUG', msg);
         }
     }
-    static info(msg:string) {
+    static info(msg:any) {
         if(LOGLEVEL.INFO >= this.level) {
             this.print('INFO', msg);
         }
     }
-    static warn(msg:string) {
+    static warn(msg:any) {
         if(LOGLEVEL.WARN >= this.level) {
             this.print('WARN', msg);
         }
     }
-    static error(msg:string) {
+    static error(msg:any) {
         if(LOGLEVEL.ERROR >= this.level) {
             this.print('ERROR', msg);
         }
