@@ -6,32 +6,48 @@ import { LambdaTransaction } from './LambdaTransaction'
 // public to client, exposed by agent
 class Agent {
 
+    public test(){
+        global.appdynamicsLambdaTransaction = null
+    }
+
+    // note that this is a sync execution but the function return could be sync or async
     static instrumentHandler(handler: Function, config?: any){
         var transaction = new LambdaTransaction(null);
         global.appdynamicsLambdaTransaction = transaction
 
-        // todo handle async case
-        return function handlerWrapperSync(event: any, context: any, callback?: any){
-            if(callback) {
-                callback = function(){
-                    transaction.stop()
+        function isSync(f: Function){
+            return true
+        }
 
-                    // I had concerns around passing null, but according to the following docs we should be fine as it will default to the global object.
-                    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/apply#Parameters
-                    // thisArg: null and undefined will be replaced with the global object, and primitive values will be boxed. This argument is not optional
-                    return callback(null, arguments)
+        if(isSync(handler)){
+            return function handlerWrapperSync(event: any, context: any, callback?: any){    
+                if(callback) {
+                    callback = function(error: Error, response?: any){
+                        // todo log error
+                        // todo check response error message
+                        return callback.apply(null, error, response) // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/apply#Parameters
+                    }
                 }
-            }
-            try {
                 transaction.start()
-                handler(event, context, callback)
+                try {
+                    handler(event, context, callback)
+                }
+                catch (error) {
+                    transaction.addError(error)
+                    transaction.stop()
+                    throw error
+                }
                 transaction.stop()
             }
-            catch (error) {
-                transaction.reportError(error)
-                transaction.stop()
-                throw error
-            }
+        } else {
+            // todo handle async case
+            /*promise.then(function(result){
+                //some code
+            }).catch(function(error) {
+                // log and rethrow 
+                console.log(error);
+                throw error;
+            });*/
         }
     }
 }

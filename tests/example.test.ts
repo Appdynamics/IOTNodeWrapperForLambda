@@ -10,6 +10,7 @@ describe('example', function() {
 });
 
 // note why does this need to be added, and how does this correlate to index.ts when everything is compiled and ran in the lambda context?
+// https://stackoverflow.com/questions/40743131/how-to-prevent-property-does-not-exist-on-type-global-with-jsdom-and-t
 declare global {
     namespace NodeJS {
         interface Global {

@@ -1,4 +1,4 @@
-import { Transaction } from "./IOTWrapper/Transaction";
+import { LambdaTransaction } from "./Refactor/LambdaTransaction";
 import { ExitCall } from "./IOTWrapper/ExitCall";
 
 export interface IOTConfig {
@@ -191,10 +191,19 @@ export enum LOGLEVEL {
 declare global {
     namespace NodeJS {
         interface Global {
+            appdynamicsLambdaTransaction: LambdaTransaction
+        }
+    }
+}
+
+/*
+declare global {
+    namespace NodeJS {
+        interface Global {
             appdynamicsLambdaTransaction: any // make statically typed to LambdaTransaction
             txn: Transaction
             AppConfig: AppConfig
         }
     }
 } 
-
+*/
