@@ -131,6 +131,7 @@ class AppAgent {
 
                 if (instrumentationenabled) {
                     process.once('beforeExit', function () {
+                        Logger.debug('process::beforeExit')
                         //if the transaction hasn't been stopped (like in an exception) send the data
                         if (global.txn && global.txn.iot && global.txn.timer && !global.txn.timer.end_process_time) {
                             Logger.info(`Stopping ${global.txn.config.transactionName}:${global.txn.config.transactionType}`);
@@ -139,13 +140,16 @@ class AppAgent {
                                 global.txn.stop();
                             } catch (err) {
                                 //eat any errors for graceful exit
-                                Logger.error(err.message)
+                                Logger.error('process::beforeExit:stop threw error')
+                                Logger.error(err)
                             }
 
                         }
                     });
                     process.removeAllListeners('uncaughtException');
                     var reportExceptionToAppDynamics = function (err: any) {
+                        Logger.error('process::reportExceptionToAppDynamics::err')
+                        Logger.error(err)
                         if (global.txn && global.txn.iot) {
                             //global.txn.iot.sync = true;
                         }
@@ -167,8 +171,9 @@ class AppAgent {
                     };
 
                     var reportRejectionToAppDynamics = function (reason: any, promise: any) {
+                        Logger.error('process::reportRejectionToAppDynamics::reason')
+                        Logger.error(reason)
                         if (global.txn) {
-
                             global.txn.reportError({ name: "UnHandledRejection", message: JSON.stringify(reason) });
                         }
                     };
@@ -234,6 +239,7 @@ class AppAgent {
 
         } catch (err) {
             Logger.error('Interceptors failed to load');
+            Logger.error(err);
         }
 
         if (newfunc) {
