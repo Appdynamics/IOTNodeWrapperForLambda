@@ -17,57 +17,85 @@ class IOT {
         this.config = config;
         if (this.config.appKey === '<NO KEY SET>') {
             this.isValid = false;
-            Logger_1.Logger.warn('Appkey is not set, no beacons will be sent.');
+            Logger_1.Logger.warn('IOT::Appkey is not set, no beacons will be sent.');
         }
         this.path = `/eumcollector/iot/v1/application/${this.config.appKey}/beacons`;
     }
+    sendBeacon(beacon) {
+        if (this.sync && this.isValid) {
+            // note there is no condition in which this will ever get called
+            try {
+                this.sendBeaconSync(beacon);
+                Logger_1.Logger.debug('IOT::sendBeaconSync::Success');
+            }
+            catch (error) {
+                Logger_1.Logger.error('IOT::sendBeaconSync failed to send.');
+                Logger_1.Logger.error(error);
+            }
+        }
+        else if (this.isValid) {
+            this.sendBeaconAsync(beacon)
+                .then(function () {
+                Logger_1.Logger.debug('IOT::sendBeaconAsync::Success');
+            })
+                .catch(function (err) {
+                Logger_1.Logger.error('IOT::sendBeaconAsync failed to send.');
+                Logger_1.Logger.error(err);
+            });
+        }
+    }
     sendBeaconSync(beacon) {
+        const options = this.setupConfig();
+        Logger_1.Logger.debug('IOT::sendBeaconSync::beacon');
+        Logger_1.Logger.debug(beacon);
+        Logger_1.Logger.debug('IOT::sendBeaconSync::http.request start');
+        const req = https.request(options, function (res) {
+            Logger_1.Logger.debug('IOT::sendBeaconSync::response');
+            Logger_1.Logger.debug(res);
+            req.on('error', function (e) {
+                Logger_1.Logger.error('IOT::sendBeaconSync::error');
+                Logger_1.Logger.error(e);
+            });
+        });
+        const json = JSON.stringify(beacon);
+        req.write(`[${json}]`);
+        req.end();
+        Logger_1.Logger.debug('IOT::sendBeaconSync::http.request end');
+    }
+    sendBeaconAsync(beacon) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const options = this.setupConfig();
+            Logger_1.Logger.debug('IOT::sendBeaconAsync::beacon');
+            Logger_1.Logger.debug(beacon);
+            return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+                Logger_1.Logger.debug('IOT::sendBeaconAsync::Promise Request Start');
+                const req = https.request(options, function (res) {
+                    Logger_1.Logger.debug('IOT::sendBeaconAsync::Request Complete');
+                    Logger_1.Logger.debug('IOT::sendBeaconAsync::Response');
+                    Logger_1.Logger.debug(res);
+                });
+                req.on('error', (err) => {
+                    Logger_1.Logger.error('IOT::sendBeaconAsync::Request Error');
+                    Logger_1.Logger.error(err);
+                    reject(err);
+                });
+                const json = JSON.stringify(beacon);
+                req.write(`[${json}]`);
+                req.end();
+                Logger_1.Logger.debug('IOT::sendBeaconAsync::Promise Request End');
+            }));
+        });
+    }
+    setupConfig() {
         const options = {
             hostname: this.config.collector,
             port: 443,
             path: this.path,
             method: 'POST'
         };
-        Logger_1.Logger.debug('IOT Beacon:');
-        Logger_1.Logger.debug(JSON.stringify(beacon));
-        const req = https.request(options, function (res) {
-            req.on('error', function (e) {
-                Logger_1.Logger.error('problem with request: ' + e.message);
-            });
-        });
-        const json = JSON.stringify(beacon);
-        req.write(`[${json}]`);
-        req.end();
-    }
-    sendBeaconAsync(beacon) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const options = {
-                hostname: this.config.collector,
-                port: 443,
-                path: this.path,
-                method: 'POST'
-            };
-            Logger_1.Logger.debug('-=-=-=-=-=-=-=-  IOT Beacon -=-=-=-=-=-=-=-=');
-            Logger_1.Logger.debug(JSON.stringify(beacon));
-            // return new pending promise
-            return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-                const req = https.request(options, function (res) {
-                    resolve('Success');
-                });
-                req.on('error', (err) => reject(err));
-                const json = JSON.stringify(beacon);
-                req.write(`[${json}]`);
-                req.end();
-            }));
-        });
-    }
-    sendBeacon(beacon) {
-        if (this.sync && this.isValid) {
-            this.sendBeaconSync(beacon);
-        }
-        else if (this.isValid) {
-            this.sendBeaconAsync(beacon).catch((err) => { Logger_1.Logger.error(err); });
-        }
+        Logger_1.Logger.debug('IOT::sendBeaconAsync::options');
+        Logger_1.Logger.debug(options);
+        return options;
     }
 }
 exports.IOT = IOT;

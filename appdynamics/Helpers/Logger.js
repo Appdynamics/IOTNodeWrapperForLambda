@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const index_1 = require("../index");
 class Logger {
     static print(level, msg) {
-        console.log(`${this.appString}::${level}::${msg}`);
+        console.log(`${this.appString}::${level}::` + msg);
     }
     static init(level) {
         if (level) {

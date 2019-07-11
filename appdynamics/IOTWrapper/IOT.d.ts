@@ -5,8 +5,9 @@ declare class IOT {
     sync: boolean;
     isValid: boolean;
     constructor(config: IOTConfig);
+    sendBeacon(beacon: IOTBeacon): void;
     sendBeaconSync(beacon: IOTBeacon): void;
     sendBeaconAsync(beacon: IOTBeacon): Promise<any>;
-    sendBeacon(beacon: IOTBeacon): void;
+    private setupConfig;
 }
 export { IOT };
