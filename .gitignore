@@ -30,3 +30,7 @@ package-lock.json
 spec/support/awsconfig.json
 spec/support/config.json
 spec/support/exampleoutput.json
+
+Personal.code-workspace
+coverage
+.nyc_output
