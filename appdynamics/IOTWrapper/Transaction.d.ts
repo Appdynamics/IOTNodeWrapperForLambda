@@ -13,6 +13,7 @@ declare class Transaction {
     constructor(config: TransactionConfiguration, beaconProperties?: BeaconProperties);
     customData(properties?: BeaconProperties): void;
     stop(properties?: BeaconProperties): void;
+    reportThrownError(error: Error, properties?: BeaconProperties): void;
     reportError(errorevent: ErrorEvent, properties?: BeaconProperties): void;
     createTimingBeacon(properties: BeaconProperties): IOTBeacon | undefined;
     createCustomExitCall(type: string, stringProperties: StringMap): ExitCall | undefined;

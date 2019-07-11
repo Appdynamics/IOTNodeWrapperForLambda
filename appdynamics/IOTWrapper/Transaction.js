@@ -74,6 +74,13 @@ class Transaction {
             this.iot.sendBeacon(beacon);
         }
     }
+    reportThrownError(error, properties) {
+        var err = {
+            name: error.name,
+            message: error + ' \n ' + error.stack
+        };
+        this.reportError(err, properties);
+    }
     reportError(errorevent, properties) {
         if (this.isValid) {
             const now = new Date();

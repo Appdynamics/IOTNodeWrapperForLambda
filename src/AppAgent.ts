@@ -147,22 +147,20 @@ class AppAgent {
                         }
                     });
                     process.removeAllListeners('uncaughtException');
-                    var reportExceptionToAppDynamics = function (err: any) {
+                    var reportExceptionToAppDynamics = function (error: Error) {
                         Logger.error('process::reportExceptionToAppDynamics::err')
-                        Logger.error(err)
+                        Logger.error(error)
                         if (global.txn && global.txn.iot) {
                             //global.txn.iot.sync = true;
                         }
                         if (global.txn) {
-
                             //Connection issues, dont wan't to end up in loop of beacons stop gracefully
-                            if (err.message === "ECONNRESET") {
+                            if (error.message === "ECONNRESET") {
                                 Logger.warn("Potential Communication issue.  Stopping communication to AppDynamics Collector for graceful shutdown.")
                                 process.exit(1);
                             }
-                            global.txn.reportError({ name: "UnCaughtExceptions", message: JSON.stringify(err) });
+                            global.txn.reportThrownError(error);
                             global.txn.stop();
-
                             Logger.info(`Stopping ${global.txn.config.transactionName}:${global.txn.config.transactionType}`);
 
                         }
@@ -174,7 +172,10 @@ class AppAgent {
                         Logger.error('process::reportRejectionToAppDynamics::reason')
                         Logger.error(reason)
                         if (global.txn) {
-                            global.txn.reportError({ name: "UnHandledRejection", message: JSON.stringify(reason) });
+                            global.txn.reportError({ 
+                                name: "UnHandledRejection", 
+                                message: JSON.stringify(reason) 
+                            });
                         }
                     };
                     process.on('uncaughtException', reportExceptionToAppDynamics);

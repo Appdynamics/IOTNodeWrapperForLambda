@@ -145,19 +145,19 @@ class AppAgent {
                         }
                     });
                     process.removeAllListeners('uncaughtException');
-                    var reportExceptionToAppDynamics = function (err) {
+                    var reportExceptionToAppDynamics = function (error) {
                         Logger_1.Logger.error('process::reportExceptionToAppDynamics::err');
-                        Logger_1.Logger.error(err);
+                        Logger_1.Logger.error(error);
                         if (global.txn && global.txn.iot) {
                             //global.txn.iot.sync = true;
                         }
                         if (global.txn) {
                             //Connection issues, dont wan't to end up in loop of beacons stop gracefully
-                            if (err.message === "ECONNRESET") {
+                            if (error.message === "ECONNRESET") {
                                 Logger_1.Logger.warn("Potential Communication issue.  Stopping communication to AppDynamics Collector for graceful shutdown.");
                                 process.exit(1);
                             }
-                            global.txn.reportError({ name: "UnCaughtExceptions", message: JSON.stringify(err) });
+                            global.txn.reportThrownError(error);
                             global.txn.stop();
                             Logger_1.Logger.info(`Stopping ${global.txn.config.transactionName}:${global.txn.config.transactionType}`);
                         }
@@ -167,7 +167,10 @@ class AppAgent {
                         Logger_1.Logger.error('process::reportRejectionToAppDynamics::reason');
                         Logger_1.Logger.error(reason);
                         if (global.txn) {
-                            global.txn.reportError({ name: "UnHandledRejection", message: JSON.stringify(reason) });
+                            global.txn.reportError({
+                                name: "UnHandledRejection",
+                                message: JSON.stringify(reason)
+                            });
                         }
                     };
                     process.on('uncaughtException', reportExceptionToAppDynamics);

@@ -5,7 +5,10 @@ class Logger {
 
     static appString = "Appdynamics";
     static print(level:string, msg: any) {
-        console.log(`${this.appString}::${level}::` + msg)
+        if (typeof msg == "object" && !(msg instanceof Error)) {
+            msg = JSON.stringify(msg, null, 2)
+        }
+        console.log(`${this.appString}::${level}::${msg}`)
     }
     static init(level:string) {
         if(level) {
