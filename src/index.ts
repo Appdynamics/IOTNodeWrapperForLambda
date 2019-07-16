@@ -15,7 +15,7 @@ export interface IOTBeacon {
 }
 
 export interface DeviceInfo {
-    deviceName?: string;
+    deviceName: string;
     deviceType: string;
     deviceId: string;
 }
@@ -28,7 +28,7 @@ export interface VersionInfo {
 }
 
 export interface Event {
-    timestamp?: number;
+    timestamp: number;
     duration?: number;
     stringProperties?: StringMap;
     booleanProperties?: BooleanMap;
@@ -71,7 +71,6 @@ export interface ExitCallMap {
 export interface CustomEvent extends Event {
     eventType: string;
     eventSummary: string;
-
 }
 
 export interface NetworkRequestEvent extends Event {

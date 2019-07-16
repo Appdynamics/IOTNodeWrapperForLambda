@@ -155,6 +155,7 @@ class Transaction {
                 duration: this.timer.elapsed,
                 stringProperties: {
                     uniqueClientId: this.config.uniqueClientId as string,
+                    // this property seems redundant, why add as a custom property? also wouldn't you want this to remain as a number?...
                     customEventDuration: (this.timer.elapsed as number).toString() + ' ms'
                 },
                 datetimeProperties: {

@@ -8,6 +8,7 @@ class HTTPInterceptor {
         const originalRequest = http.request;
         // override the function
         http.request = function wrapMethodRequest(req: any) {
+            
             if (req.host && req.host.indexOf("amazonaws") >= 0) {
                 return originalRequest.apply(this, arguments as any );
             }

@@ -6,10 +6,22 @@
   "types": "appdynamics/index.d.ts",
   "author": "Michael Sickles",
   "license": "ISC",
-  "scripts":{
-    "test": "mocha -r ts-node/register tests/**/*.test.ts"
+  "scripts": {
+    "test": "mocha -r ts-node/register test/**/*.test.ts"
   },
-  "mocha.requires": [ "ts-node/register" ],
+  "runtimeArgs": [
+    "-r",
+    "ts-node/register"
+  ],
+  "mocha.requires": [
+    "ts-node/register"
+  ],
+  "mocha.logVerbose": true,
+  "mocha.files.glob": [
+    "test/**/*.ts",
+    "test/**/*.test.ts"
+  ],
+  "mocha.showInExplorer": true,
   "dependencies": {
     "@types/node": "^10.12.10"
   },
