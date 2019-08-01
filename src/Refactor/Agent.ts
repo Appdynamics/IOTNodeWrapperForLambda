@@ -8,6 +8,7 @@ class Agent {
 
     // note that this is a sync execution but the function return could be sync or async
     static instrumentHandler(handler: Function, config?: any){
+        
         var transaction = new LambdaTransaction(config.appKey, config.debugMode);
         global.appdynamicsLambdaTransaction = transaction
 
@@ -20,6 +21,15 @@ class Agent {
                 var wrappedCallback = originalCallback
                 if(originalCallback) {
                     wrappedCallback = function(error: Error, response?: any){
+                        console.log('awsHandler_withHandledError HIT')
+                        if(error){
+                            console.log('adding error')
+                            transaction.addError(error)
+                        }
+                        if(response){
+                            console.log('response found')
+                        }
+                        // 7.29.todo
                         // todo check & log error
                         // todo check response error message
                         // todo write unit tests for
@@ -28,17 +38,17 @@ class Agent {
                 }
                 transaction.start(context)
                 try {
-                    // todo write unit test for
                     handler(event, context, wrappedCallback)
                 }
                 catch (error) {
-                    transaction.addError(error) // todo write unit test for
+                    transaction.addError(error)
                     transaction.stop()
                     throw error
                 }
                 transaction.stop()
             }
         } else {
+            throw new Error('not implemented yet')
             return function handlerWrapperAsync(event: any, context: any){
                 console.log('async')
                 handler(event, context)

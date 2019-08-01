@@ -86,7 +86,7 @@ class LambdaTransaction {
         // already started
         if(this.state != LAMDA_TRANSACTION_STATE.INIT){
             console.error('an attempt was made to start the transaction in a non-initiated state, state was: ' + this.state)
-            throw new Error('an attempt was made to start the transaction in a non-initiated state')
+            throw 'an attempt was made to start the transaction in a non-initiated state'
         }
 
         if(this.debug && !this.api.isAppEnabled()){
@@ -110,16 +110,11 @@ class LambdaTransaction {
 
     private instrumentHttpRequestFunction(){
 
-        // note this does not handle other parameters coming in
-        // http.request(options[, callback])
-        // http.request(url[, options][, callback])
-        // note not handling: https.request, https.get, http.get
-
         var lambdaTransaction = this
         var originalHttpRequest = http.request
-        http.request = function httpRequestWrapper() {
+        http.request = function httpRequestWrapper(options: any, originalCallback?: any): any {
             
-            var url = lambdaTransaction.getUrlFromOptions(arguments[0])
+            var url = lambdaTransaction.getUrlFromOptions(options)
             if(url.indexOf("appdynamics") >= 0){
                 return originalHttpRequest.apply(this, arguments as any)
             }
@@ -127,14 +122,11 @@ class LambdaTransaction {
             var requestTimer = new Timer()
             requestTimer.start()
 
-            // todo inspect callback
-            // note: why do we care about
-            var originalCallback = arguments[1]
             if(!originalCallback){
                 originalCallback = function defaultCallback(response:any){
                     response.setEncoding('utf8')
                     response.on('data', (chunk:any) => {
-                        // console.log(`BODY: ${chunk}`)
+                        console.log(`BODY: ${chunk}`)
                     })
                     response.on('end', () => {
                         console.log('No more data in response.')
@@ -145,9 +137,9 @@ class LambdaTransaction {
             // unit test successful execution & verify log output
             // unit test that the original response is still called
             var callingContext = this
-            arguments[1] = function callbackWrapper(response:any){                
-                // console.log(`STATUS: ${response.statusCode}`);                
-                // console.log(`HEADERS: ${JSON.stringify(response.headers)}`);                
+            var wrappedCallback = function callbackWrapper(response:any){                
+                console.log(`STATUS: ${response.statusCode}`);                
+                console.log(`HEADERS: ${JSON.stringify(response.headers)}`);                
                 requestTimer.stop()                
                 var networkRequestEvent:NetworkRequestEvent = {                
                     statusCode: response.statusCode,                
@@ -156,11 +148,10 @@ class LambdaTransaction {
                     duration: requestTimer.getTimeElapsed()                
                 }
                 lambdaTransaction.addNetworkRequest(networkRequestEvent)
-                originalCallback.apply(callingContext, [response])
+                originalCallback.apply(callingContext, response)
             }
 
-            var request = originalHttpRequest.apply(this, [arguments[0], arguments[1]])
-
+            var request = originalHttpRequest.apply(this, [options, wrappedCallback])
             request.on('error', function(error:any){
                 // unit test an error occuring, possibly just to an unauthorized place? or would that just hit the response?
                 // think i need to hit a non existing website probably
@@ -174,7 +165,6 @@ class LambdaTransaction {
                 }
                 lambdaTransaction.addNetworkRequest(networkRequestEvent)
             })
-
             return request
         }
 
@@ -235,16 +225,13 @@ class LambdaTransaction {
     }
 
     addError(error: Error){
-        // 7.29.todo add error
         // send beacon
-        // handle scenario where it's just a string..
     }
 
     addRejectedPromise(reason: any, promise: any){
         // send beacon
     }
 
-    // TODO make sure to force lower case
     addCustomProperty(key: string, value: object){
         this.customProperties.set(key,value)
     }
