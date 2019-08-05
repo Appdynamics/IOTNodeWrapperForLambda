@@ -23,13 +23,13 @@ describe('agent', function() {
        }
     }
 
-    function awsHandler_withUnhandledError(event: any, context: any, callback: any){
+    function awsHandler_basic(event: any, context: any, callback: any){
         wait(123)
         console.log('handled')
         callback()
     }
 
-    function awsHandler_withError(event: any, context: any, callback: any){
+    function awsHandler_withUnhandledError(event: any, context: any, callback: any){
         throw new Error('awsHandler_withError thrown error')
     }
 
@@ -107,7 +107,96 @@ describe('agent', function() {
             console.log('awsHandler_httpExitCall end')
             callback()
         });
+    }
 
+    function awsHandler_TwohttpExitCalls(event: any, context: any, callback: any){
+
+        // httpstat.us
+
+        const options = {
+            hostname: 'httpstat.us',
+            port: 80,
+            path: '/200',
+        };
+        
+        // Make a request
+        const req = http.request(options);
+        req.end();
+        
+        req.on('error', (info) => {
+            console.log('awsHandler_TwohttpExitCalls error')
+            assert(false)
+        });
+        
+        req.on('end', (info) => {
+            console.log('awsHandler_TwohttpExitCalls end')
+        });
+        
+        // Make a request
+        const req2 = http.request(options);
+        req2.end();
+        
+        req2.on('error', (info) => {
+            console.log('awsHandler_TwohttpExitCalls error')
+            assert(false)
+        });
+        
+        req2.on('end', (info) => {
+            console.log('awsHandler_TwohttpExitCalls end')
+            callback()
+        });
+    }
+
+    function awsHandler_ThreehttpExitCalls(event: any, context: any, callback: any){
+
+        // httpstat.us
+
+        const options = {
+            hostname: 'httpstat.us',
+            port: 80,
+            path: '/200',
+        };
+        
+        // Make a request
+        const req = http.request(options);
+        req.end();
+        
+        req.on('error', (info) => {
+            console.log('awsHandler_TwohttpExitCalls error')
+            assert(false)
+        });
+        
+        req.on('end', (info) => {
+            console.log('awsHandler_TwohttpExitCalls end')
+        });
+        
+        // Make a request
+        const req2 = http.request(options);
+        req2.end();
+        
+        req2.on('error', (info) => {
+            console.log('awsHandler_TwohttpExitCalls error')
+            assert(false)
+        });
+        
+        req2.on('end', (info) => {
+            console.log('awsHandler_TwohttpExitCalls end')
+            callback()
+        });
+        
+        // Make a request
+        const req3 = http.request(options);
+        req3.end();
+        
+        req3.on('error', (info) => {
+            console.log('awsHandler_TwohttpExitCalls error')
+            assert(false)
+        });
+        
+        req3.on('end', (info) => {
+            console.log('awsHandler_TwohttpExitCalls end')
+            callback()
+        });
     }
 
     function awsHandler_httpExitCall_withCallback(event: any, context: any, callback: any){
@@ -132,22 +221,40 @@ describe('agent', function() {
         });
     }
 
+    function awsHandler_callback_withUnhandledError(event: any, context: any, callback: any){
+
+        
+    }
+
     function callback2(){
         console.log('callbacked')
     }
+/*
+    it('awsHandler_httpExitCall_withCallback_500', function(){
+        runHandlerTest(awsHandler_httpExitCall_withCallback_500, 'awsHandler_httpExitCall_withCallback_500')
+    })
+
+
+    it('awsHandler_httpExitCall', function(){
+        runHandlerTest(awsHandler_httpExitCall, 'awsHandler_httpExitCall')
+    })
+
+    it('awsHandler_TwohttpExitCalls', function(){
+        runHandlerTest(awsHandler_TwohttpExitCalls, 'awsHandler_TwohttpExitCalls')
+    })
 
     
+    it('awsHandler_ThreehttpExitCalls', function(){
+        runHandlerTest(awsHandler_ThreehttpExitCalls, 'awsHandler_ThreehttpExitCalls')
+    })
+    */
     /*
-    it('awsHandler', function() {
-        runHandlerTest(awsHandler, 'awsHandler')
+    it('awsHandler_basic', function() {
+        runHandlerTest(awsHandler_basic, 'awsHandler_basic')
     }); 
 
     it('awsHandler_httpExitCall_withCallback', function(){
         runHandlerTest(awsHandler_httpExitCall_withCallback, 'awsHandler_httpExitCall_withCallback')
-    })
-
-    it('awsHandler_httpExitCall', function(){
-        runHandlerTest(awsHandler_httpExitCall, 'awsHandler_httpExitCall')
     })
 
     it('awsHandler_httpExitCall_runTwice', function(){
@@ -164,8 +271,6 @@ describe('agent', function() {
         runHandlerTest(awsHandler_httpExitCall_Error500, 'awsHandler_httpExitCall_Error500')
     })
 
-    */
-/*
     it('awsHandler_withUnhandledError', function(){
         try {
             runHandlerTest(awsHandler_withUnhandledError, 'awsHandler_withUnhandledError')
@@ -174,10 +279,10 @@ describe('agent', function() {
             assert(true)
         }
     })
-*/
+
     it('awsHandler_withHandledError', function(){
         runHandlerTest(awsHandler_withHandledError, 'awsHandler_withHandledError')
-    })
+    })*/
 
     function runHandlerTest(func:any, funcName:any){
         var newHandler = Agent.instrumentHandler(func, {
@@ -186,9 +291,18 @@ describe('agent', function() {
         })
         var lambdaContext = {
             functionName: funcName,
-            functionVersion: 1
+            functionVersion: 1,
+            awsRequestId: uuidv4()
         }
         newHandler(null, lambdaContext, callback2)
     }
+
+    function uuidv4() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
+      }
+      
 
 });

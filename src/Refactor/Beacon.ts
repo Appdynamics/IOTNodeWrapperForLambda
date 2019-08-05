@@ -40,7 +40,7 @@ class Beacon {
     }
 
     addErrorEvent(errorEvent: ErrorEvent){
-        this.errorEvents.push()
+        this.errorEvents.push(errorEvent)
     }
 }
 

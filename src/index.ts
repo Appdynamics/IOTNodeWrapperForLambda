@@ -27,6 +27,18 @@ export interface VersionInfo {
     opteratingSytemVersion?: string;
 }
 
+// Map<string,any>
+
+/*export interface Event {
+    timestamp: number;
+    duration?: number;
+    stringProperties: Map<string,string>;
+    booleanProperties?: Map<boolean,string>;
+    doubleProperties?: Map<number,string>;
+    datetimeProperties?: Map<number,string>;
+}*/
+
+
 export interface Event {
     timestamp: number;
     duration?: number;
@@ -39,13 +51,13 @@ export interface Event {
 export interface BeaconProperties {
     [key: string]: string | number | StringMap | undefined | BooleanMap | NumberMap | boolean;
     /*A map of the string properties of this event. There cannot be more than 16 string properties per event. Entry keys have a max length of 24 characters. Entry values have a max length of 128 characters. Entry keys cannot contain the pipe character '|'. Valid Examples: { "username": "john.doe" }*/
-    stringProperties?: StringMap;
+    stringProperties: StringMap;
     /*A map of the boolean properties of this event. There cannot be more than 16 boolean properties per event. Entry keys have a max length of 24 characters. Entry keys cannot contain the pipe character '|'. Valid Examples: { "error": false }*/
-    booleanProperties?: BooleanMap;
+    booleanProperties: BooleanMap;
     /*A map of the double properties of this event. There cannot be more than 16 double properties per event. Entry keys have a max length of 24 characters. Entry keys cannot contain the pipe character '|'. Valid Examples: { "Fahrenheit": 98.2 }*/
-    doubleProperties?: NumberMap;
+    doubleProperties: NumberMap;
     /*A map of the datetime properties of this event, in millisecond epoch time. There cannot be more than 16 datetime properties per event. Entry keys have a max length of 24 characters. Entry keys cannot contain the pipe character '|'. Valid Examples: { "bootTime": 1487119625012 }*/
-    datetimeProperties?: NumberMap;
+    datetimeProperties: NumberMap;
 }
 
 export interface StringMap {

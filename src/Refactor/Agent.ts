@@ -12,40 +12,61 @@ class Agent {
         var transaction = new LambdaTransaction(config.appKey, config.debugMode);
         global.appdynamicsLambdaTransaction = transaction
 
-        function isSync(f: Function){
-            return true
+        function isAsync(f: Function){
+            return f.constructor.name == 'AsyncFunction'
         }
 
-        if(isSync(handler)){
+        function isHttpErrorResponse(response:any){
+            // https://docs.aws.amazon.com/apigateway/latest/developerguide/handle-errors-in-lambda-integration.html
+            return response 
+                && response.statusCode 
+                && (response.statusCode < 200 || response.statusCode > 299)
+        }
+
+        if(isAsync(handler)){
             return function handlerWrapperSync(event: any, context: any, originalCallback?: any){    
+
                 var wrappedCallback = originalCallback
                 if(originalCallback) {
                     wrappedCallback = function(error: Error, response?: any){
-                        console.log('awsHandler_withHandledError HIT')
                         if(error){
-                            console.log('adding error')
                             transaction.addError(error)
                         }
-                        if(response){
-                            console.log('response found')
+                        else if(isHttpErrorResponse(response)){
+                            // it should always have a body in this instance
+                            // https://docs.aws.amazon.com/apigateway/latest/developerguide/handle-errors-in-lambda-integration.html
+                            var errorMessage:string = response.body
+                                ? response.body 
+                                : ''
+                            var transactionError = new Error()
+                            transactionError.name = response.statusCode
+                            transactionError.message = errorMessage
+                            transaction.addError(transactionError)
                         }
-                        // 7.29.todo
-                        // todo check & log error
-                        // todo check response error message
-                        // todo write unit tests for
-                        return originalCallback.apply(null, error, response) // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/apply#Parameters
+                        console.log('wrappedCallback.apply')
+                        return originalCallback.apply(null, error, response)
                     }
                 }
+
                 transaction.start(context)
+                var unhandledError:Error
                 try {
-                    handler(event, context, wrappedCallback)
+                    if(wrappedCallback){
+                        handler(event, context, wrappedCallback)
+                    } else {
+                        handler(event, context)
+                    }                        
                 }
                 catch (error) {
+                    unhandledError = error
                     transaction.addError(error)
+                } finally {
                     transaction.stop()
-                    throw error
                 }
-                transaction.stop()
+
+                if(unhandledError){
+                    throw unhandledError
+                }
             }
         } else {
             throw new Error('not implemented yet')

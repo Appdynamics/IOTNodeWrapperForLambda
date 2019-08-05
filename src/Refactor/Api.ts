@@ -71,8 +71,9 @@ class Api {
     // https://www.tomas-dvorak.cz/posts/nodejs-request-without-dependencies/
     // https://nodejs.org/api/http.html
     sendBeacons(beacons: Beacon[]){
-
+        console.log(beacons)
         const postData = JSON.stringify(beacons)
+        console.log(postData)
         const options = {
             hostname: this.hostName,
             port: 443,

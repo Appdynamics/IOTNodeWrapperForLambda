@@ -1,12 +1,16 @@
 import { 
     CustomEvent,
-    NetworkRequestEvent
+    NetworkRequestEvent,
+    BeaconProperties,
+    ErrorEvent
 } from '../index';
 import { Api } from './Api';
 import { Beacon } from './Beacon';
 import { Timer } from './Timer';
 import http = require('http');
 import URL = require('url')
+import { stringify } from 'querystring';
+import { HelperMethods } from '../Helpers/HelperMethods';
 // import https = require('https')
 
 enum LAMDA_TRANSACTION_STATE {
@@ -15,7 +19,7 @@ enum LAMDA_TRANSACTION_STATE {
     STOPPED = 2,
     TRANSACTION_ERROR = 3,
     VALIDATION_ERROR = 4,
-    FATAL_ERROR = 5, // internal appd error
+    SEND_BEACON_ERROR = 5, // internal appd error
     APP_DISABLED = 6
 }
 
@@ -67,14 +71,19 @@ class LambdaTransaction {
     private api: Api
     private debug: boolean
     private appKey: string
-    private customProperties: Map<string,any>
+    private globalBeaconProperties: BeaconProperties
 
     constructor(appKey: string, isDebug:boolean = false){
         this.appKey = appKey
         this.debug = true
         this.timer = new Timer
         this.api = new Api(this.appKey)
-        this.customProperties = new Map<string,any>()
+        this.globalBeaconProperties = {
+            stringProperties: {},
+            datetimeProperties: {},
+            booleanProperties: {},
+            doubleProperties: {}            
+        }
         this.beacon = new Beacon
     }
 
@@ -96,13 +105,19 @@ class LambdaTransaction {
         }
 
         this.lambdaContext = lambdaContext
-        this.beacon.deviceInfo.deviceType = 'LambdaTransaction'
-        this.beacon.deviceInfo.deviceName = this.lambdaContext.functionName // should deviceName and Id be switched?
-        this.beacon.deviceInfo.deviceId = this.lambdaContext.functionName //+ '_' + this.lambdaContext.functionVersion
+        this.beacon.deviceInfo.deviceType = 'AwsLambdaTransaction'
+        this.beacon.deviceInfo.deviceId =  this.lambdaContext.awsRequestId
+        this.beacon.deviceInfo.deviceName = this.lambdaContext.functionName
+
+        this.globalBeaconProperties.stringProperties['awsFunctionName'] = this.lambdaContext.functionName
+        this.globalBeaconProperties.stringProperties['awsFunctionVersion'] = this.lambdaContext.functionVersion
+        this.globalBeaconProperties.stringProperties['awsInvokedFunctionArn'] = this.lambdaContext.invokedFunctionArn
+        this.globalBeaconProperties.stringProperties['awsMemoryLimitInMB'] = this.lambdaContext.memoryLimitInMB
+        this.globalBeaconProperties.stringProperties['awsRequestId'] = this.lambdaContext.awsRequestId
+        this.globalBeaconProperties.stringProperties['awsLogGroupName'] = this.lambdaContext.logGroupName
+        this.globalBeaconProperties.stringProperties['awsLogStreamName'] = this.lambdaContext.logStreamName
 
         this.instrumentHttpRequestFunction()
-
-        // todo at some point need to instrument interceptors / http code
 
         this.timer.start()
         this.state = LAMDA_TRANSACTION_STATE.STARTED
@@ -110,19 +125,29 @@ class LambdaTransaction {
 
     private instrumentHttpRequestFunction(){
 
+        // TODO handle scenario where if this gets called a second time a warning needs to be displayed.
+        // code will end up reporting inaccurate beacons in this edge scenario
+        // only encountered during unit testing since everything runs in the same process
+        // it's not anticipated that AWS will re-use the HTTP library and it's wrapped function
+        // recommended solution: inspect the http.request to see if it == 'httpRequestWrapper'
+
         // note this does not handle other parameters coming in
         // http.request(options[, callback])
         // http.request(url[, options][, callback])
         // note not handling: https.request, https.get, http.get
+        // does https call http under the covers? need to test..
 
         var lambdaTransaction = this
         var originalHttpRequest = http.request
         http.request = function httpRequestWrapper() {
+
             
             var url = lambdaTransaction.getUrlFromOptions(arguments[0])
             if(url.indexOf("appdynamics") >= 0){
                 return originalHttpRequest.apply(this, arguments as any)
             }
+
+            console.log('http.request')
 
             var requestTimer = new Timer()
             requestTimer.start()
@@ -155,6 +180,7 @@ class LambdaTransaction {
                     timestamp: requestTimer.getStartTime(),                
                     duration: requestTimer.getTimeElapsed()                
                 }
+                HelperMethods.setPropertiesOnEvent(networkRequestEvent, lambdaTransaction.globalBeaconProperties)
                 lambdaTransaction.addNetworkRequest(networkRequestEvent)
                 originalCallback.apply(callingContext, [response])
             }
@@ -172,6 +198,7 @@ class LambdaTransaction {
                     timestamp: requestTimer.getStartTime(),
                     duration: requestTimer.getTimeElapsed()
                 }
+                HelperMethods.setPropertiesOnEvent(networkRequestEvent, lambdaTransaction.globalBeaconProperties)
                 lambdaTransaction.addNetworkRequest(networkRequestEvent)
             })
 
@@ -205,16 +232,6 @@ class LambdaTransaction {
             return
         }
 
-        // todo put this back in, I was just lazy to handle the callback code flows
-        /*if(this.debug){
-            this.api.validateBeacons([this.beacon])
-                .then()
-                .catch()
-            console.error('Beacon is not valid, see logs for more information.')
-            this.state = LAMDA_TRANSACTION_STATE.VALIDATION_ERROR
-            return
-        }*/
-
         this.timer.stop()
 
         var customEvent:CustomEvent = {
@@ -223,38 +240,55 @@ class LambdaTransaction {
             eventType: 'LambdaTransaction',
             eventSummary: this.beacon.deviceInfo.deviceName
         }
-        for(var key in this.customProperties.keys){
-            // customEvent.stringProperties.set(key, this.customProperties.get(key))
-        }
+        HelperMethods.setPropertiesOnEvent(customEvent, this.globalBeaconProperties)
         this.beacon.addCustomEvent(customEvent)
 
-        // todo update beacon properties such as custom event with custom timing information
+        if(this.debug){
+            this.api.validateBeacons([this.beacon])
+                .then(this.sendBeacon.bind(this))
+                .catch(this.handleInvalidBeacon.bind(this))
+        } else {
+            this.sendBeacon()
+        }
+    }
 
+    handleInvalidBeacon(){
+        console.error('Beacon is not valid, see logs for more information.')
+        this.state = LAMDA_TRANSACTION_STATE.VALIDATION_ERROR
+        return
+    }
+
+    sendBeacon(){
         this.api.sendBeacons([this.beacon])
-        this.state = LAMDA_TRANSACTION_STATE.STOPPED
+            .then(this.handleSendBeaconSuccess.bind(this))
+            .catch(this.handleSendBeaconError.bind(this))
+    }
+
+    handleSendBeaconSuccess(response:any){
+        console.log('handleSendBeaconSuccess')
+    }
+
+    handleSendBeaconError(error: Error){
+        console.error('handleSendBeaconError')
+        console.error(error)
     }
 
     addError(error: Error){
-        // 7.29.todo add error
-        // send beacon
-        // handle scenario where it's just a string..
+        var errorEvent:ErrorEvent = {   
+            name: error.name,
+            message: error.message,
+            timestamp: Date.now()
+        }
+        HelperMethods.setPropertiesOnEvent(errorEvent, this.globalBeaconProperties)
+        this.beacon.addErrorEvent(errorEvent)
     }
 
-    addRejectedPromise(reason: any, promise: any){
+    //addRejectedPromise(reason: any, promise: any){
         // send beacon
-    }
-
-    // TODO make sure to force lower case
-    addCustomProperty(key: string, value: object){
-        this.customProperties.set(key,value)
-    }
+    //}
 
     addNetworkRequest(networkRequestEvent: NetworkRequestEvent){
         this.beacon.addNetworkRequestEvent(networkRequestEvent)
-    }
-
-    setCustomProperties(newCustomProperties: any){
-        // if new properties are provided, they will overwrite the existing ones.
     }
 }
 

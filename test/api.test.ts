@@ -9,11 +9,12 @@ import {
 } from '../src/index'
 import { fail } from 'assert';
 import { isError } from 'util';
-/*
+
 describe('api', function() {
 
+    /*
     it('isAppEnabled', function() {
-
+        // not implemented
     }); 
 
     it('validateBeacons_valid', function() {
@@ -60,6 +61,5 @@ describe('api', function() {
             .then((response) => console.log(response))
             .catch((err) => fail(err))
     }); 
-
-});
 */
+});

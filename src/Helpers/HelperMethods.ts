@@ -99,6 +99,7 @@ class HelperMethods {
 
         }
     }
+    /*
     static findEventHeaderInformation(event: any): any {
 
         return HelperMethods.goThroughHeaders(event, '_evt', global.AppConfig.lambdaHeaders as DataTypeMap);
@@ -114,7 +115,7 @@ class HelperMethods {
 
         return HelperMethods.goThroughHeaders(req, '_req', global.AppConfig.requestHeaders as DataTypeMap);
 
-    }
+    }*/
     // static findEventDataInformation(event, properties: string[]) {
 
     //     if (properties) {
@@ -178,28 +179,28 @@ class HelperMethods {
         if (properties) {
             if (properties.stringProperties) {
                 if (event.stringProperties) {
-                    event.stringProperties = { ...event.stringProperties, ...properties.stringProperties }
+                    Object.assign(event.stringProperties, properties.stringProperties)
                 } else {
                     event.stringProperties = properties.stringProperties;
                 }
             }
             if (properties.doubleProperties) {
                 if (event.doubleProperties) {
-                    event.doubleProperties = { ...event.doubleProperties, ...properties.doubleProperties }
+                    Object.assign(event.doubleProperties, properties.doubleProperties)
                 } else {
                     event.doubleProperties = properties.doubleProperties;
                 }
             }
             if (properties.booleanProperties) {
                 if (event.booleanProperties) {
-                    event.booleanProperties = { ...event.booleanProperties, ...properties.booleanProperties }
+                    Object.assign(event.booleanProperties, properties.booleanProperties)
                 } else {
                     event.booleanProperties = properties.booleanProperties;
                 }
             }
             if (properties.datetimeProperties) {
                 if (event.datetimeProperties) {
-                    event.datetimeProperties = { ...event.datetimeProperties, ...properties.datetimeProperties }
+                    Object.assign(event.datetimeProperties, properties.datetimeProperties)
                 } else {
                     event.datetimeProperties = properties.datetimeProperties;
                 }
