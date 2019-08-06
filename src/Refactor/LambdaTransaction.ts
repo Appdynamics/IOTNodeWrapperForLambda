@@ -147,28 +147,9 @@ class LambdaTransaction {
                 return originalHttpRequest.apply(this, arguments as any)
             }
 
-            console.log('http.request')
-
             var requestTimer = new Timer()
             requestTimer.start()
-
-            // todo inspect callback
-            // note: why do we care about
             var originalCallback = arguments[1]
-            if(!originalCallback){
-                originalCallback = function defaultCallback(response:any){
-                    response.setEncoding('utf8')
-                    response.on('data', (chunk:any) => {
-                        // console.log(`BODY: ${chunk}`)
-                    })
-                    response.on('end', () => {
-                        console.log('No more data in response.')
-                    })
-                }
-            }
-            
-            // unit test successful execution & verify log output
-            // unit test that the original response is still called
             var callingContext = this
             arguments[1] = function callbackWrapper(response:any){                
                 // console.log(`STATUS: ${response.statusCode}`);                
@@ -182,11 +163,16 @@ class LambdaTransaction {
                 }
                 HelperMethods.setPropertiesOnEvent(networkRequestEvent, lambdaTransaction.globalBeaconProperties)
                 lambdaTransaction.addNetworkRequest(networkRequestEvent)
-                originalCallback.apply(callingContext, [response])
+                if(originalCallback){
+                    originalCallback.apply(callingContext, [response])
+                }
             }
 
             var request = originalHttpRequest.apply(this, [arguments[0], arguments[1]])
 
+            // do not attach an error listner
+            // https://nodejs.org/api/http.html#http_http_request_options_callback
+            // reference: If any error is encountered during the request (be that with DNS resolution, TCP level errors, or actual HTTP parse errors) an 'error' event is emitted on the returned request object. As with all 'error' events, if no listeners are registered the error will be thrown.
             request.on('error', function(error:any){
                 // unit test an error occuring, possibly just to an unauthorized place? or would that just hit the response?
                 // think i need to hit a non existing website probably
@@ -200,6 +186,7 @@ class LambdaTransaction {
                 }
                 HelperMethods.setPropertiesOnEvent(networkRequestEvent, lambdaTransaction.globalBeaconProperties)
                 lambdaTransaction.addNetworkRequest(networkRequestEvent)
+                throw error
             })
 
             return request

@@ -73,7 +73,6 @@ class Api {
     sendBeacons(beacons: Beacon[]){
         console.log(beacons)
         const postData = JSON.stringify(beacons)
-        console.log(postData)
         const options = {
             hostname: this.hostName,
             port: 443,
@@ -87,7 +86,6 @@ class Api {
         return new Promise((resolve, reject) => {
 
             const request = https.request(options, (response) => {
-                console.log(response.statusCode)
                 // handle http errors
                 if(!response.statusCode){ // this shouldn't be a valid scenario but typescript it stupid sometimes, I'd want an error to be thrown in this scenario
                     reject(new Error('No status code provided in response. Response: ' + response))
