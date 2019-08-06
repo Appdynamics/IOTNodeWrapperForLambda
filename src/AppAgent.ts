@@ -1,3 +1,4 @@
+import { Agent } from "./Refactor/Agent";
 import { AppConfig, BooleanMap, DataTypeMap, BeaconProperties } from "./index";
 import { Transaction } from "./IOTWrapper/Transaction";
 import { HTTPInterceptor } from "./Interceptors/HTTPInterceptor";
@@ -15,6 +16,10 @@ class AppAgent {
     }
 
     static init(func: any, config?: AppConfig) {
+
+        // todo modify how the config gets passed in, need to accomodate for additional config..
+
+        Agent.init(func, config)
 
         // parameters
             // awsHandler (currently called func)

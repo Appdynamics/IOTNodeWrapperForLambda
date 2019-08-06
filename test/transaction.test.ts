@@ -1,4 +1,4 @@
-import { Agent } from '../src/Refactor/Agent'
+import { AppAgent } from '../src/AppAgent'
 import { LambdaTransaction, LambdaContext } from '../src/Refactor/LambdaTransaction'
 import http = require('http');
 const assert = require('assert');
@@ -70,7 +70,7 @@ describe('agent', function() {
         
         // Make a request
         const req = http.request(options, function(response){
-            callback(null, 200)
+            callback(null, response)
         });
         req.end();
         
@@ -320,6 +320,10 @@ describe('agent', function() {
     it('awsHandler_httpExitCall_Error500', function(){
         runHandlerTest(awsHandler_httpExitCall_Error500, 'awsHandler_httpExitCall_Error500')
     })
+    
+    it('awsHandler_httpExitCall_Error500', function(){
+        runHandlerTestProps(awsHandler_httpExitCall_Error500, 'awsHandler_httpExitCall_Error500')
+    })
 /*
     it('awsHandler_withUnhandledError', function(){
         try {
@@ -363,7 +367,7 @@ describe('agent', function() {
     })*/
 
     function runHandlerTest(func:any, funcName:any){
-        var newHandler = Agent.instrumentHandler(func, {
+        var newHandler = AppAgent.init(func, {
             appKey: 'AD-AAB-AAR-SKR', 
             debugMode: true
         })
@@ -374,7 +378,31 @@ describe('agent', function() {
         }
         newHandler(null, lambdaContext, callback2)
     }
+/*
+    function runHandlerTestProps(func:any, funcName:any){
+        var newHandler = AppAgent.init(func, {
+            appKey: 'AD-AAB-AAR-SKR', 
+            debugMode: true
+        })
+        var lambdaContext = {
+            functionName: funcName,
+            functionVersion: 1,
+            awsRequestId: uuidv4()
+        }
 
+        /*handler = AppAgent.init(handler, {
+            uniqueIDHeader: "clientrequestid",
+            lambdaHeaders: {
+                "x-originator-type": DataType.STRING,
+                "x-clientapp-version": DataType.STRING,
+                "x-os-type": DataType.STRING,
+                "SessionId": DataType.STRING
+            }
+        });
+
+
+        newHandler(null, lambdaContext, callback2)
+    }*/
 
     function uuidv4() {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
