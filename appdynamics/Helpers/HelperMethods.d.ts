@@ -11,6 +11,6 @@ declare class HelperMethods {
     static formatResponseHeaders(headers: StringMap): ResponseHeaders | undefined;
     static setStringPropertiesTogether(map1: StringMap, map2: StringMap): StringMap;
     static mergeBeaconProperties(beaconprop1: BeaconProperties, beaconprop2: BeaconProperties): BeaconProperties;
-    static setPropertiesOnEvent(event: ErrorEvent | NetworkRequestEvent | CustomEvent, properties: BeaconProperties | undefined): ErrorEvent | NetworkRequestEvent | CustomEvent;
+    static setPropertiesOnEvent(event: ErrorEvent | NetworkRequestEvent | CustomEvent, properties: BeaconProperties | undefined): CustomEvent | NetworkRequestEvent | ErrorEvent;
 }
 export { HelperMethods };
