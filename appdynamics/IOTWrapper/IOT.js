@@ -15,6 +15,7 @@ class IOT {
         this.sync = false;
         this.isValid = true;
         this.config = config;
+        // this shouldn't get this far
         if (this.config.appKey === '<NO KEY SET>') {
             this.isValid = false;
             Logger_1.Logger.warn('Appkey is not set, no beacons will be sent.');
@@ -55,6 +56,7 @@ class IOT {
                     Logger_1.Logger.info(`Beacon Status Code: ${res.statusCode}`);
                     resolve('Success');
                 });
+                // inconsistent ways of handling error event
                 req.on('error', (err) => reject(err));
                 const json = JSON.stringify(beacon);
                 req.write(`[${json}]`);
@@ -63,11 +65,13 @@ class IOT {
         });
     }
     sendBeacon(beacon) {
+        // should have debug logging
         if (this.sync && this.isValid) {
             this.sendBeaconSync(beacon);
         }
         else if (this.isValid) {
-            this.sendBeaconAsync(beacon).catch((err) => { Logger_1.Logger.error(JSON.stringify(err)); });
+            this.sendBeaconAsync(beacon)
+                .catch((err) => { Logger_1.Logger.error(JSON.stringify(err)); });
         }
     }
 }

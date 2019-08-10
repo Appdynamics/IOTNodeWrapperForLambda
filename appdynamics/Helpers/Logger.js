@@ -2,9 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const index_1 = require("../index");
 class Logger {
-    static print(level, msg) {
-        console.log(`${this.appString}::${level}::${msg}`);
-    }
     static init(level) {
         if (level) {
             switch (level) {
@@ -28,25 +25,24 @@ class Logger {
     }
     static debug(msg) {
         if (index_1.LOGLEVEL.DEBUG >= this.level) {
-            this.print('DEBUG', msg);
+            console.debug('AppDynamics:Debug: ' + msg);
         }
     }
     static info(msg) {
         if (index_1.LOGLEVEL.INFO >= this.level) {
-            this.print('INFO', msg);
+            console.info('AppDynamics:Info : ' + msg);
         }
     }
     static warn(msg) {
         if (index_1.LOGLEVEL.WARN >= this.level) {
-            this.print('WARN', msg);
+            console.warn('AppDynamics:Warn:  ' + msg);
         }
     }
     static error(msg) {
         if (index_1.LOGLEVEL.ERROR >= this.level) {
-            this.print('ERROR', msg);
+            console.error('AppDynamics:Error: ' + msg);
         }
     }
 }
-Logger.level = index_1.LOGLEVEL.ERROR;
-Logger.appString = "Appdynamics";
+Logger.level = index_1.LOGLEVEL.INFO;
 exports.Logger = Logger;

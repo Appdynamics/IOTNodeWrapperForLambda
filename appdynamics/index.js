@@ -15,3 +15,14 @@ var LOGLEVEL;
     LOGLEVEL[LOGLEVEL["ERROR"] = 4] = "ERROR";
     LOGLEVEL[LOGLEVEL["OFF"] = 5] = "OFF";
 })(LOGLEVEL = exports.LOGLEVEL || (exports.LOGLEVEL = {}));
+/*
+declare global {
+    namespace NodeJS {
+        interface Global {
+            appdynamicsLambdaTransaction: any // make statically typed to LambdaTransaction
+            txn: Transaction
+            AppConfig: AppConfig
+        }
+    }
+}
+*/

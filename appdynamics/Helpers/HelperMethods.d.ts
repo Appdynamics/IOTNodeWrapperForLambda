@@ -2,14 +2,12 @@ import { DataTypeMap, StringMap, NetworkRequestEvent, CustomEvent, BeaconPropert
 declare class HelperMethods {
     static isValid(obj: any, prop: string): boolean;
     static propertyOrDefault(obj: any, prop: string, init: any): any;
-    static findEventDataInformation(event: any, BeaconProperties: BeaconProperties, configMap: DataTypeMap): {
+    static setStringProperty(stringMap: StringMap, key: string, value: string): void;
+    static findEventDataInformation(event: any, configMap: DataTypeMap): {
         eventDataFound: boolean;
         beaconProperties: BeaconProperties;
     };
-    static goThroughHeaders(res: any, append: string, configMap: DataTypeMap): any;
-    static findEventHeaderInformation(event: any): any;
-    static findResponHeaderInformation(res: any): any;
-    static findRequestHeaderInformation(req: any): any;
+    static goThroughHeaders(res: any, prepend: string, configMap: DataTypeMap): any;
     static formatResponseHeaders(headers: StringMap): ResponseHeaders | undefined;
     static setStringPropertiesTogether(map1: StringMap, map2: StringMap): StringMap;
     static mergeBeaconProperties(beaconprop1: BeaconProperties, beaconprop2: BeaconProperties): BeaconProperties;

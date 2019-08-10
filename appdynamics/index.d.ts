@@ -1,4 +1,4 @@
-import { Transaction } from "./IOTWrapper/Transaction";
+import { LambdaTransaction } from "./Refactor/LambdaTransaction";
 import { ExitCall } from "./IOTWrapper/ExitCall";
 export interface IOTConfig {
     appKey: string;
@@ -12,7 +12,7 @@ export interface IOTBeacon {
     errorEvents?: [ErrorEvent];
 }
 export interface DeviceInfo {
-    deviceName?: string;
+    deviceName: string;
     deviceType: string;
     deviceId: string;
 }
@@ -23,7 +23,7 @@ export interface VersionInfo {
     opteratingSytemVersion?: string;
 }
 export interface Event {
-    timestamp?: number;
+    timestamp: number;
     duration?: number;
     stringProperties?: StringMap;
     booleanProperties?: BooleanMap;
@@ -32,10 +32,10 @@ export interface Event {
 }
 export interface BeaconProperties {
     [key: string]: string | number | StringMap | undefined | BooleanMap | NumberMap | boolean;
-    stringProperties?: StringMap;
-    booleanProperties?: BooleanMap;
-    doubleProperties?: NumberMap;
-    datetimeProperties?: NumberMap;
+    stringProperties: StringMap;
+    booleanProperties: BooleanMap;
+    doubleProperties: NumberMap;
+    datetimeProperties: NumberMap;
 }
 export interface StringMap {
     [propName: string]: string;
@@ -133,7 +133,8 @@ export interface TransactionConfiguration {
     lambdaHeaders?: StringMap;
 }
 export interface AppConfig {
-    appKey?: string;
+    appKey: string;
+    instrumentationEnabled?: boolean;
     uniqueIDHeader?: string;
     loglevel?: string;
     lambdaHeaders?: DataTypeMap;
@@ -152,8 +153,7 @@ export declare enum LOGLEVEL {
 declare global {
     namespace NodeJS {
         interface Global {
-            txn: Transaction;
-            AppConfig: AppConfig;
+            txn: LambdaTransaction;
         }
     }
 }
