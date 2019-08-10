@@ -77,7 +77,7 @@ describe('final', function() {
        }
     }
 
-    function awsHandler_basic(event: any, context: any, callback: any){
+    async function awsHandler_basic(event: any, context: any, callback: any){
         // wait(10)
         // todo call global.txn.customData({})
         console.log('handled')

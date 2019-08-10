@@ -18,7 +18,7 @@ class Agent {
 
     }
 
-    static instrumentHandler(handler: Function, config: AppConfig):Function{
+    static instrumentHandler(handler: any, config: AppConfig):Function{
         
         var logLevel = config.loglevel ? config.loglevel : 'DEBUG'
         Logger.init(logLevel)
@@ -44,11 +44,8 @@ class Agent {
         }
 
         function isAsync (func:any) {
-            var string2check = {}.toString.call(func);
-            return (string2check === '[object AsyncFunction]');
-            // todo this doesn't function properly
-            //return func.constructor.name === 'AsyncFunction'
-            return true
+            // this doesn't appear to work in mocha, TODO test in AWS environment
+            return func.constructor.name === "AsyncFunction"
         }
 
         function isPromise(object:any) {
