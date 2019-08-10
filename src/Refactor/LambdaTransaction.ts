@@ -136,6 +136,11 @@ class LambdaTransaction {
 
         this.instrumentHttpRequestFunction()
 
+        // this.instrumentAwsSdk()
+        // https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/using-a-response-event-handler.html
+        // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS.html#events-property
+        // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Request.html
+
         this.timer.start()
         this.state = LAMDA_TRANSACTION_STATE.STARTED
     }
