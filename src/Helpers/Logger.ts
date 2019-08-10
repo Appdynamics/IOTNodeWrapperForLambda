@@ -28,25 +28,25 @@ class Logger {
 
     static debug(msg:string) {
         if(LOGLEVEL.DEBUG >= this.level) {
-            console.debug('AppDynamics :: ' + msg)
+            console.debug('AppDynamics:Debug: ' + msg)
         }
     }
 
     static info(msg:string) {
         if(LOGLEVEL.INFO >= this.level) {
-            console.info('AppDynamics :: ' + msg)
+            console.info('AppDynamics:Info: ' + msg)
         }
     }
 
     static warn(msg:string) {
         if(LOGLEVEL.WARN >= this.level) {
-            console.warn('AppDynamics :: ' + msg)
+            console.warn('AppDynamics:Warn: ' + msg)
         }
     }
 
     static error(msg:any) {
         if(LOGLEVEL.ERROR >= this.level) {
-            console.error('AppDynamics :: ' + msg)
+            console.error('AppDynamics:Error: ' + msg)
         }
     }
 }

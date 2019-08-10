@@ -297,7 +297,7 @@ class LambdaTransaction {
     stop(){
         // nothing to stop
         if(this.state != LAMBDA_TRANSACTION_STATE.STARTED){
-            console.warn('an attempt was made to stop the transaction in a non-started state, state was: ' + this.state)
+            Logger.warn('an attempt was made to stop the transaction in a non-started state, state was: ' + this.state)
             return
         }
 
@@ -330,17 +330,18 @@ class LambdaTransaction {
     }
 
     sendBeacon(){
+        Logger.debug('About to send beacon.')
         this.api.sendBeacons([this.beacon])
             .then(this.handleSendBeaconSuccess.bind(this))
             .catch(this.handleSendBeaconError.bind(this))
     }
 
     handleSendBeaconSuccess(response:any){
-        Logger.debug('handleSendBeaconSuccess')
+        Logger.info('Beacon sent successfully.')
     }
 
     handleSendBeaconError(error: Error){
-        Logger.error('handleSendBeaconError')
+        Logger.error('Beacon failed to send.')
         Logger.error(error)
     }
 

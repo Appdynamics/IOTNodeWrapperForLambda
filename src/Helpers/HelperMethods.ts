@@ -38,6 +38,13 @@ class HelperMethods {
             doubleProperties: {},
             datetimeProperties: {}
         };
+
+        if(!event){
+            return {
+                eventDataFound: false,
+                beaconProperties: beaconProperties
+            }
+        }
         if (configMap) {
             for (var dataKey in configMap) {
                 if (event && event[dataKey]) {
@@ -79,6 +86,14 @@ class HelperMethods {
             doubleProperties: {},
             datetimeProperties: {}
         };
+
+        if(!res){
+            return {
+                headersFound: false,
+                beaconProperties: beaconProperties
+            }
+        }
+
         if (configMap) {
             for (var headerKey in configMap) {
                 if (res.headers && res.headers[headerKey]) {

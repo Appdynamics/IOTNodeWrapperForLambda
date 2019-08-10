@@ -49,15 +49,16 @@ class Api {
                 response.on('data', (chunk) => body.push(chunk))
                 // we are done, resolve promise with those joined chunks
                 response.on('end', () => {
-                    Logger.debug('Api.validateBeacons.promise,request end')
                     var responseBody:string = body.join('')
                     if(response.statusCode == 400 || response.statusCode == 422){
+                        Logger.debug('Api.validateBeacons.promise.response is not valid, see validation messages.')
                         var validationMessages = JSON.parse(responseBody)
                         for(var i = 0; i < validationMessages.messages.length; i++){
                             Logger.warn('Validation Failure: ' + validationMessages.messages[i])
                         }
                         reject(new Error('Failed to validate beacons, status code: ' + response.statusCode))
                     } else {
+                        Logger.debug('Api.validateBeacons.promise.response is valid.')
                         resolve(responseBody)
                     }
                 })
@@ -109,9 +110,10 @@ class Api {
                 response.on('data', (chunk) => body.push(chunk))
                 // we are done, resolve promise with those joined chunks
                 response.on('end', () => function(){
-                    Logger.debug('Api.sendBeacons.promise.request end')
+                    Logger.debug('Api.sendBeacons.promise.response end')
                     resolve(body.join(''))
                 })
+                Logger.debug('Api.sendBeacons.promise.request end')
             })
 
             request.on('error', (err) => reject(err))

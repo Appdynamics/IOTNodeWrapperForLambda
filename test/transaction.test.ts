@@ -316,7 +316,7 @@ describe('agent', function() {
             //assert(true)
         }
     })
-*/
+
     it('awsHandler_httpExitCall_Error500', function(){
         runHandlerTest(awsHandler_httpExitCall_Error500, 'awsHandler_httpExitCall_Error500')
     })
@@ -324,7 +324,7 @@ describe('agent', function() {
     it('awsHandler_httpExitCall_Error500', function(){
         runHandlerTestProps(awsHandler_httpExitCall_Error500, 'awsHandler_httpExitCall_Error500')
     })
-/*
+
     it('awsHandler_withUnhandledError', function(){
         try {
             runHandlerTest(awsHandler_withUnhandledError, 'awsHandler_withUnhandledError')
@@ -369,7 +369,7 @@ describe('agent', function() {
     function runHandlerTest(func:any, funcName:any){
         var newHandler = AppAgent.init(func, {
             appKey: 'AD-AAB-AAR-SKR', 
-            debugMode: true
+           // debugMode: true
         })
         var lambdaContext = {
             functionName: funcName,

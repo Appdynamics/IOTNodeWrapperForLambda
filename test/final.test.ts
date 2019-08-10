@@ -78,7 +78,7 @@ describe('final', function() {
     }
 
     function awsHandler_basic(event: any, context: any, callback: any){
-        wait(123)
+        // wait(10)
         // todo call global.txn.customData({})
         console.log('handled')
         callback()
@@ -89,20 +89,11 @@ describe('final', function() {
     }
 
     it('awsHandler_basic', function() {
-        /*var newHandler = AppAgent.init(awsHandler_basic, {
-            appKey: 'AD-AAB-AAR-SKR', 
-            debugMode: true
-        })
-        var lambdaContext = {
-            functionName: 'awsHandler_basic',
-            functionVersion: 1,
-            awsRequestId: uuidv4()
-        }
-        newHandler(null, lambdaContext, callback2)*/
+
         var config:AppConfig = {
             appKey: 'AD-AAB-AAR-SKR',
-            uniqueIDHeader: null,
-            loglevel: 'debug',
+            uniqueIDHeader: undefined,
+            loglevel: 'DEBUG',
             lambdaHeaders: {
                 'lambdaHeaderTest' : DataType.STRING
             }, 

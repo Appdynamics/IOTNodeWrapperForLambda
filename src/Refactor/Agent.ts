@@ -1,6 +1,6 @@
 import { LambdaTransaction, LambdaContext } from './LambdaTransaction'
 import { AppConfig, BooleanMap, DataType, DataTypeMap, BeaconProperties } from "../index";
-import { Logger } from 'src/Helpers/Logger';
+import { Logger } from '../Helpers/Logger';
 
 /*
 const AsyncFunction = require('./async-function');
@@ -20,6 +20,9 @@ class Agent {
 
     static instrumentHandler(handler: Function, config: AppConfig):Function{
         
+        var logLevel = config.loglevel ? config.loglevel : 'DEBUG'
+        Logger.init(logLevel)
+
         if(!config.appKey){
             Logger.warn('handler will not be instrumented, please provide an appKey')
             return handler
@@ -41,6 +44,8 @@ class Agent {
         }
 
         function isAsync (func:any) {
+            var string2check = {}.toString.call(func);
+            return (string2check === '[object AsyncFunction]');
             // todo this doesn't function properly
             //return func.constructor.name === 'AsyncFunction'
             return true
