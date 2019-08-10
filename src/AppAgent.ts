@@ -1,4 +1,4 @@
-import { Agent } from "./Refactor/Agent";
+import { Agent } from "./Agent";
 import { AppConfig } from "./index";
 
 class AppAgent {

@@ -128,6 +128,10 @@ class LambdaTransaction {
         this.beacon.deviceInfo.deviceType = 'AwsLambdaTransaction'
         this.beacon.deviceInfo.deviceId =  this.lambdaContext.awsRequestId
         this.beacon.deviceInfo.deviceName = this.lambdaContext.functionName
+        this.beacon.versionInfo.softwareVersion = this.lambdaContext.functionVersion
+        // probably better to auto use something like the npm package version, will need to manually update for now
+        // intended for us to know which agent version is being used
+        this.beacon.versionInfo.firmwareVersion = '1.0' 
 
         HelperMethods.setStringProperty(this.globalBeaconProperties.stringProperties, 'awsFunctionName', this.lambdaContext.functionName)
         HelperMethods.setStringProperty(this.globalBeaconProperties.stringProperties, 'awsFunctionVersion', this.lambdaContext.functionVersion)
