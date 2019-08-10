@@ -142,7 +142,7 @@ class LambdaTransaction {
         }
 
         if(this.config.lambdaHeaders){
-            var eventHeaderProperties = HelperMethods.goThroughHeaders(lambdaEvent, '_evth', this.config.lambdaHeaders as DataTypeMap)
+            var eventHeaderProperties = HelperMethods.goThroughHeaders(lambdaEvent, 'evth_', this.config.lambdaHeaders as DataTypeMap)
             if(eventHeaderProperties.headersFound){
                 HelperMethods.mergeBeaconProperties(this.globalBeaconProperties, eventHeaderProperties.beaconProperties)
             }
@@ -175,7 +175,7 @@ class LambdaTransaction {
         if(properties.stringProperties){
             var scrubbedStringProps = {} as StringMap
             for(var key in properties.stringProperties){
-                HelperMethods.setStringProperty(scrubbedStringProps, key, properties.stringProperties[key])
+                HelperMethods.setStringProperty(scrubbedStringProps, 'cus_' + key, properties.stringProperties[key])
             }
             properties.stringProperties = scrubbedStringProps
         }
@@ -211,7 +211,7 @@ class LambdaTransaction {
                 return originalHttpRequest.apply(this, arguments as any)
             }
 
-            var requestProperties = HelperMethods.goThroughHeaders(arguments[0], '_req', lambdaTransaction.config.requestHeaders as DataTypeMap)
+            var requestProperties = HelperMethods.goThroughHeaders(arguments[0], 'req_', lambdaTransaction.config.requestHeaders as DataTypeMap)
             var requestTimer = new Timer()
             requestTimer.start()
             var originalCallback = arguments[1]
@@ -235,11 +235,14 @@ class LambdaTransaction {
                 
                 // request props
                 if(requestProperties.headersFound){
+                    console.log(lambdaTransaction.globalBeaconProperties)
+                    // BUG, this is some how setting data on lambdaTransaction.globalBeaconProperties
                     HelperMethods.setPropertiesOnEvent(networkRequestEvent, requestProperties.beaconProperties)
+                    console.log(lambdaTransaction.globalBeaconProperties)
                 }
 
                 // response props
-                var responseProperties =  HelperMethods.goThroughHeaders(response, '_res', lambdaTransaction.config.responseHeaders as DataTypeMap);
+                var responseProperties =  HelperMethods.goThroughHeaders(response, 'res_', lambdaTransaction.config.responseHeaders as DataTypeMap);
                 if(responseProperties.headersFound){
                     HelperMethods.setPropertiesOnEvent(networkRequestEvent, responseProperties.beaconProperties)
                 }

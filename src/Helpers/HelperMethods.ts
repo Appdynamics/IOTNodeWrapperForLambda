@@ -51,7 +51,7 @@ class HelperMethods {
                     eventDataFound = true;
                     Logger.debug(`Found Event Data for : ${dataKey}`);
                     var datatype: DataType = configMap[dataKey];
-                    var dataKey = dataKey.toLowerCase() + "_evt"
+                    var dataKey = "evt_" + dataKey
                     switch (datatype) {
                         case DataType.STRING:
                             HelperMethods.setStringProperty(beaconProperties.stringProperties, dataKey, event[dataKey])
@@ -78,7 +78,7 @@ class HelperMethods {
             beaconProperties: beaconProperties
         }
     }
-    static goThroughHeaders(res: any, append: string, configMap: DataTypeMap): any {
+    static goThroughHeaders(res: any, prepend: string, configMap: DataTypeMap): any {
         var headersFound = false;
         var beaconProperties: BeaconProperties = {
             stringProperties: {},
@@ -100,24 +100,24 @@ class HelperMethods {
                     headersFound = true;
                     Logger.debug(`Found header: ${headerKey}`);
                     var datatype: DataType = configMap[headerKey];
+                    var dataKey = prepend + headerKey
                     switch (datatype) {
                         case DataType.STRING:
-                            HelperMethods.setStringProperty(beaconProperties.stringProperties, headerKey.toLowerCase() + append, res.header[headerKey])
+                            HelperMethods.setStringProperty(beaconProperties.stringProperties, dataKey, res.headers[headerKey])
                             break;
                         case DataType.DATETIME:
-                            beaconProperties.datetimeProperties[headerKey.toLowerCase() + append] = new Date(res.headers[headerKey]).getTime();
+                            beaconProperties.datetimeProperties[dataKey] = new Date(res.headers[headerKey]).getTime();
                             break;
                         case DataType.BOOLEAN:
-                            beaconProperties.booleanProperties[headerKey.toLowerCase() + append] = res.headers[headerKey];
+                            beaconProperties.booleanProperties[dataKey] = res.headers[headerKey];
                             break;
                         case DataType.DOUBLE:
-                            beaconProperties.doubleProperties[headerKey.toLowerCase() + append] = res.headers[headerKey];
+                            beaconProperties.doubleProperties[dataKey] = res.headers[headerKey];
                             break;
                         default:
                             Logger.warn(`DataType "${datatype}" is not a valid datatype`);
                             break;
                     }
-
                 }
             }
         }
@@ -126,40 +126,7 @@ class HelperMethods {
             beaconProperties: beaconProperties
         }
     }
-    
-    /*
-    static findEventHeaderInformation(event: any): any {
 
-        return HelperMethods.goThroughHeaders(event, '_evt', global.AppConfig.lambdaHeaders as DataTypeMap);
-
-
-    }
-    static findResponHeaderInformation(res: any): any {
-
-        return HelperMethods.goThroughHeaders(res, '_res', global.AppConfig.responseHeaders as DataTypeMap);
-
-    }
-    static findRequestHeaderInformation(req: any): any {
-
-        return HelperMethods.goThroughHeaders(req, '_req', global.AppConfig.requestHeaders as DataTypeMap);
-
-    }*/
-    // static findEventDataInformation(event, properties: string[]) {
-
-    //     if (properties) {
-    //         for (let prop in properties) {
-    //             if (responseHeaders[key]) {
-    //                 responseHeaders[key].push(headers[key]);
-    //             } else {
-    //                 responseHeaders[key] = [headers[key]];
-    //             }
-    //         }
-    //         return responseHeaders;
-    //     } else {
-    //         return undefined;
-    //     }
-
-    // }
     static formatResponseHeaders(headers: StringMap) {
         var responseHeaders: ResponseHeaders = {};
 
@@ -197,35 +164,35 @@ class HelperMethods {
         } as BeaconProperties;
     }
     static setPropertiesOnEvent(event: ErrorEvent | NetworkRequestEvent | CustomEvent, properties: BeaconProperties | undefined) {
-
         if (properties) {
             if (properties.stringProperties) {
-                if (event.stringProperties) {
-                    Object.assign(event.stringProperties, properties.stringProperties)
-                } else {
-                    event.stringProperties = properties.stringProperties;
+                if (!event.stringProperties) {
+                    event.stringProperties = {}
                 }
+                Object.assign(event.stringProperties, properties.stringProperties)
             }
             if (properties.doubleProperties) {
+                if (!event.doubleProperties) {
+                    event.doubleProperties = {}
+                }
+                Object.assign(event.doubleProperties, properties.doubleProperties)
                 if (event.doubleProperties) {
-                    Object.assign(event.doubleProperties, properties.doubleProperties)
+                    
                 } else {
                     event.doubleProperties = properties.doubleProperties;
                 }
             }
             if (properties.booleanProperties) {
-                if (event.booleanProperties) {
-                    Object.assign(event.booleanProperties, properties.booleanProperties)
-                } else {
-                    event.booleanProperties = properties.booleanProperties;
+                if (!event.booleanProperties) {
+                    event.booleanProperties = {}
                 }
+                Object.assign(event.booleanProperties, properties.booleanProperties)
             }
             if (properties.datetimeProperties) {
-                if (event.datetimeProperties) {
-                    Object.assign(event.datetimeProperties, properties.datetimeProperties)
-                } else {
-                    event.datetimeProperties = properties.datetimeProperties;
+                if (!event.datetimeProperties) {
+                    event.datetimeProperties = {}
                 }
+                Object.assign(event.datetimeProperties, properties.datetimeProperties)
             }
         }
         return event;

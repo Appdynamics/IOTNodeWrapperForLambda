@@ -87,8 +87,38 @@ describe('final', function() {
             stringProperties : stringProps
         } as BeaconProperties
         global.txn.customData(beaconProps);
-        console.log('handled')
-        callback()
+
+
+        const options = {
+            hostname: 'httpstat.us',
+            port: 80,
+            path: '/200',
+            headers: {
+                requestHeaderTest: 'requestHeaderTestValue'
+            }
+        };
+        
+        // Make a request
+        const req = http.request(options);
+        
+        req.on('error', (info) => {
+            console.log('awsHandler_httpExitCall error')
+            assert(false)
+        });
+        
+        req.on('end', (info) => {
+            console.log('awsHandler_httpExitCall end')
+            callback()
+        });
+        
+        req.on('close', (info:any) => {
+            console.log('awsHandler_httpExitCall close')
+            callback()
+        });
+
+        req.end();
+
+        console.log('end')
     }
 
     function callback2(){
@@ -121,12 +151,19 @@ describe('final', function() {
         }
         var newHandler = AppAgent.init(awsHandler_basic, config)
 
+        var lambdaEvent = {
+            headers: {
+                lambdaHeaderTest: 'lambdaHeaderTestValue'
+            },
+            eventDataTest: 'eventDataTestValue'
+        }
+
         var lambdaContext = {
             functionName: 'awsHandler_basic',
             functionVersion: 1,
             awsRequestId: uuidv4()
         }
-        newHandler(null, lambdaContext, callback2)
+        newHandler(lambdaEvent, lambdaContext, callback2)
 
     }); 
 
