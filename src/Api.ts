@@ -1,6 +1,6 @@
 import https = require('https')
 import {Beacon} from './Beacon'
-import { Logger } from '../Helpers/Logger';
+import { Logger } from './Helpers/Logger';
 
 class Api {
 

@@ -1,6 +1,6 @@
 import { LambdaTransaction, LambdaContext } from './LambdaTransaction'
-import { AppConfig, BooleanMap, DataType, DataTypeMap, BeaconProperties } from "../index";
-import { Logger } from '../Helpers/Logger';
+import { AppConfig, BooleanMap, DataType, DataTypeMap, BeaconProperties } from "./index";
+import { Logger } from './Helpers/Logger';
 
 /*
 const AsyncFunction = require('./async-function');

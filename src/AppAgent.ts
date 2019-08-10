@@ -1,6 +1,5 @@
 import { Agent } from "./Refactor/Agent";
 import { AppConfig } from "./index";
-import { Logger } from "./Helpers/Logger";
 
 class AppAgent {
 

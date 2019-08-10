@@ -1,5 +1,4 @@
-import { LambdaTransaction } from "./Refactor/LambdaTransaction";
-import { ExitCall } from "./IOTWrapper/ExitCall";
+import { LambdaTransaction } from "./LambdaTransaction";
 
 export interface IOTConfig {
     appKey: string;
@@ -76,9 +75,11 @@ export interface DataTypeMap {
     [propeName: string]: DataType;
 }
 
+/*
 export interface ExitCallMap {
     [propName: string]: ExitCall;
 }
+*/
 
 export interface CustomEvent extends Event {
     eventType: string;

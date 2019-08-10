@@ -1,5 +1,5 @@
-import { Api } from '../src/Refactor/Api'
-import { Beacon } from '../src/Refactor/Beacon';
+import { Api } from '../src/Api'
+import { Beacon } from '../src/Beacon';
 import { 
     DeviceInfo,
     VersionInfo,

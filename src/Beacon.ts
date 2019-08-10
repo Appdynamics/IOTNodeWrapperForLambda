@@ -4,7 +4,7 @@ import {
     CustomEvent,
     NetworkRequestEvent,
     ErrorEvent
-} from '../index'
+} from './index'
 
 class Beacon {
 

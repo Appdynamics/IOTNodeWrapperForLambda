@@ -1,5 +1,5 @@
 import { AppAgent } from '../src/AppAgent'
-import { LambdaTransaction, LambdaContext } from '../src/Refactor/LambdaTransaction'
+import { LambdaTransaction, LambdaContext } from '../src/LambdaTransaction'
 import http = require('http');
 const assert = require('assert');
 

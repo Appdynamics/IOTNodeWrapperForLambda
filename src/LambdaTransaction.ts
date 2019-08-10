@@ -6,14 +6,14 @@ import {
     AppConfig,
     DataTypeMap,
     StringMap
-} from '../index';
+} from './index';
 import { Api } from './Api';
 import { Beacon } from './Beacon';
 import { Timer } from './Timer';
 import http = require('http');
 import URL = require('url')
-import { HelperMethods } from '../Helpers/HelperMethods';
-import { Logger } from '../Helpers/Logger';
+import { HelperMethods } from './Helpers/HelperMethods';
+import { Logger } from './Helpers/Logger';
 
 
 enum LAMBDA_TRANSACTION_STATE {

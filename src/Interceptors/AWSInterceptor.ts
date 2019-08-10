@@ -1,4 +1,4 @@
-const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
+/*const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
 import { Logger } from '../Helpers/Logger'
 import { TextEncoder } from 'util';
 import { ExitCall } from '../IOTWrapper/ExitCall';
@@ -102,4 +102,4 @@ class AWSInterceptor {
 }
 
 
-export { AWSInterceptor }
+export { AWSInterceptor }*/

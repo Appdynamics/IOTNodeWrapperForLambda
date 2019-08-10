@@ -53,9 +53,8 @@ handler = AppAgent.init(handler, {
 
 import { AppAgent } from '../src/AppAgent'
 import { AppConfig, BooleanMap, DataType, DataTypeMap, BeaconProperties, StringMap } from "../src/index";
-import { LambdaTransaction, LambdaContext } from '../src/Refactor/LambdaTransaction'
+import { LambdaTransaction, LambdaContext } from '../src/LambdaTransaction'
 import http = require('http');
-import { Beacon } from '../src/Refactor/Beacon';
 const assert = require('assert');
 
 // note why does this need to be added, and how does this correlate to index.ts when everything is compiled and ran in the lambda context?
