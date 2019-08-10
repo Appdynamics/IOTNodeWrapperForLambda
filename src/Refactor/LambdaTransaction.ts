@@ -2,7 +2,10 @@ import {
     CustomEvent,
     NetworkRequestEvent,
     BeaconProperties,
-    ErrorEvent
+    ErrorEvent,
+    AppConfig,
+    DataTypeMap,
+    StringMap
 } from '../index';
 import { Api } from './Api';
 import { Beacon } from './Beacon';
@@ -21,12 +24,6 @@ enum LAMDA_TRANSACTION_STATE {
     VALIDATION_ERROR = 4,
     SEND_BEACON_ERROR = 5, // internal appd error
     APP_DISABLED = 6
-}
-
-interface LambdaConfig {
-    debug: boolean,
-    appKey: string,
-    deviceType: string
 }
 
 export interface LambdaContext {
@@ -72,10 +69,12 @@ class LambdaTransaction {
     private debug: boolean
     private appKey: string
     private globalBeaconProperties: BeaconProperties
+    private config: AppConfig
 
-    constructor(appKey: string, isDebug:boolean = false){
-        this.appKey = appKey
-        this.debug = true
+    constructor(config: AppConfig){
+        this.config = config
+        this.appKey = config.appKey
+        this.debug = (config.loglevel && config.loglevel == 'debug') ? true : true
         this.timer = new Timer
         this.api = new Api(this.appKey)
         this.globalBeaconProperties = {
@@ -91,7 +90,7 @@ class LambdaTransaction {
         return this.state
     }
 
-    start(lambdaContext:LambdaContext){
+    start(lambdaEvent:any, lambdaContext:LambdaContext){
         // already started
         if(this.state != LAMDA_TRANSACTION_STATE.INIT){
             console.error('an attempt was made to start the transaction in a non-initiated state, state was: ' + this.state)
@@ -109,13 +108,31 @@ class LambdaTransaction {
         this.beacon.deviceInfo.deviceId =  this.lambdaContext.awsRequestId
         this.beacon.deviceInfo.deviceName = this.lambdaContext.functionName
 
-        this.globalBeaconProperties.stringProperties['awsFunctionName'] = this.lambdaContext.functionName
-        this.globalBeaconProperties.stringProperties['awsFunctionVersion'] = this.lambdaContext.functionVersion
-        this.globalBeaconProperties.stringProperties['awsInvokedFunctionArn'] = this.lambdaContext.invokedFunctionArn
-        this.globalBeaconProperties.stringProperties['awsMemoryLimitInMB'] = this.lambdaContext.memoryLimitInMB
-        this.globalBeaconProperties.stringProperties['awsRequestId'] = this.lambdaContext.awsRequestId
-        this.globalBeaconProperties.stringProperties['awsLogGroupName'] = this.lambdaContext.logGroupName
-        this.globalBeaconProperties.stringProperties['awsLogStreamName'] = this.lambdaContext.logStreamName
+        HelperMethods.setStringProperty(this.globalBeaconProperties.stringProperties, 'awsFunctionName', this.lambdaContext.functionName)
+        HelperMethods.setStringProperty(this.globalBeaconProperties.stringProperties, 'awsFunctionVersion', this.lambdaContext.functionVersion)
+        HelperMethods.setStringProperty(this.globalBeaconProperties.stringProperties, 'awsInvokedFunctionArn', this.lambdaContext.invokedFunctionArn)
+        HelperMethods.setStringProperty(this.globalBeaconProperties.stringProperties, 'awsMemoryLimitInMB', this.lambdaContext.memoryLimitInMB)
+        HelperMethods.setStringProperty(this.globalBeaconProperties.stringProperties, 'awsRequestId', this.lambdaContext.awsRequestId)
+        HelperMethods.setStringProperty(this.globalBeaconProperties.stringProperties, 'awsLogGroupName', this.lambdaContext.logGroupName)
+        HelperMethods.setStringProperty(this.globalBeaconProperties.stringProperties, 'awsLogStreamName', this.lambdaContext.logStreamName)
+
+        if(this.config.uniqueIDHeader && lambdaEvent.headers){
+            HelperMethods.setStringProperty(this.globalBeaconProperties.stringProperties, 'awsCustomUniqueId', lambdaEvent.headers[this.config.uniqueIDHeader])
+        }
+
+        if(this.config.lambdaHeaders){
+            var eventHeaderProperties = HelperMethods.goThroughHeaders(lambdaEvent, '_evth', this.config.lambdaHeaders as DataTypeMap)
+            if(eventHeaderProperties.headersFound){
+                HelperMethods.mergeBeaconProperties(this.globalBeaconProperties, eventHeaderProperties.beaconProperties)
+            }
+        }
+
+        if(this.config.eventData){
+            var eventProperties = HelperMethods.findEventDataInformation(lambdaEvent, this.config.eventData as DataTypeMap)
+            if(eventProperties.eventDataFound){
+                HelperMethods.mergeBeaconProperties(this.globalBeaconProperties, eventProperties.beaconProperties)
+            }
+        }
 
         this.instrumentHttpRequestFunction()
 
@@ -141,28 +158,44 @@ class LambdaTransaction {
         var originalHttpRequest = http.request
         http.request = function httpRequestWrapper() {
 
-            
             var url = lambdaTransaction.getUrlFromOptions(arguments[0])
             if(url.indexOf("appdynamics") >= 0){
                 return originalHttpRequest.apply(this, arguments as any)
             }
 
+            var requestProperties = HelperMethods.goThroughHeaders(arguments[0], '_req', lambdaTransaction.config.requestHeaders as DataTypeMap)
             var requestTimer = new Timer()
             requestTimer.start()
             var originalCallback = arguments[1]
             var callingContext = this
+
             arguments[1] = function callbackWrapper(response:any){                
-                // console.log(`STATUS: ${response.statusCode}`);                
-                // console.log(`HEADERS: ${JSON.stringify(response.headers)}`);                
-                requestTimer.stop()                
+
+                requestTimer.stop()     
+
                 var networkRequestEvent:NetworkRequestEvent = {                
                     statusCode: response.statusCode,                
                     url: url,                
                     timestamp: requestTimer.getStartTime(),                
                     duration: requestTimer.getTimeElapsed()                
                 }
+
+                // global props
                 HelperMethods.setPropertiesOnEvent(networkRequestEvent, lambdaTransaction.globalBeaconProperties)
+                
+                // request props
+                if(requestProperties.headersFound){
+                    HelperMethods.setPropertiesOnEvent(networkRequestEvent, requestProperties.beaconProperties)
+                }
+
+                // response props
+                var responseProperties =  HelperMethods.goThroughHeaders(response, '_res', lambdaTransaction.config.responseHeaders as DataTypeMap);
+                if(responseProperties.headersFound){
+                    HelperMethods.setPropertiesOnEvent(networkRequestEvent, responseProperties.beaconProperties)
+                }
+                
                 lambdaTransaction.addNetworkRequest(networkRequestEvent)
+
                 if(originalCallback){
                     originalCallback.apply(callingContext, [response])
                 }
@@ -170,22 +203,30 @@ class LambdaTransaction {
 
             var request = originalHttpRequest.apply(this, [arguments[0], arguments[1]])
 
-            // do not attach an error listner
             // https://nodejs.org/api/http.html#http_http_request_options_callback
-            // reference: If any error is encountered during the request (be that with DNS resolution, TCP level errors, or actual HTTP parse errors) an 'error' event is emitted on the returned request object. As with all 'error' events, if no listeners are registered the error will be thrown.
             request.on('error', function(error:any){
-                // unit test an error occuring, possibly just to an unauthorized place? or would that just hit the response?
-                // think i need to hit a non existing website probably
+
                 console.error(`problem with request: ${error.message}`);
+
                 requestTimer.stop()
+
                 var networkRequestEvent:NetworkRequestEvent = {
                     url: url,
                     networkError: error.message,
                     timestamp: requestTimer.getStartTime(),
                     duration: requestTimer.getTimeElapsed()
                 }
+                
+                // global props
                 HelperMethods.setPropertiesOnEvent(networkRequestEvent, lambdaTransaction.globalBeaconProperties)
+                
+                // request props
+                if(requestProperties.headersFound){
+                    HelperMethods.setPropertiesOnEvent(networkRequestEvent, requestProperties.beaconProperties)
+                }
+
                 lambdaTransaction.addNetworkRequest(networkRequestEvent)
+
                 throw error
             })
 

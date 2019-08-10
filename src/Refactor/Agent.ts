@@ -1,4 +1,5 @@
 import { LambdaTransaction, LambdaContext } from './LambdaTransaction'
+import { AppConfig, BooleanMap, DataType, DataTypeMap, BeaconProperties } from "../index";
 
 /*
 const AsyncFunction = require('./async-function');
@@ -11,10 +12,20 @@ Object.assign(addGlobals, {
 class Agent {
 
     // note that this is a sync execution but the function return could be sync or async
-    static instrumentHandler(handler: Function, config?: any):Function{
+
+    static instrumentHandlerAsync(){
+
+    }
+
+    static instrumentHandler(handler: Function, config: AppConfig):Function{
         
-        var transaction = new LambdaTransaction(config.appKey, config.debugMode);
-        global.appdynamicsLambdaTransaction = transaction
+        if(!config.appKey){
+            console.warn('handler will not be instrumented, please provide an appKey')
+            return handler
+        }
+
+        var transaction = new LambdaTransaction(config);
+        global.txn = transaction
 
         function isAsync (func:any) {
             // todo this doesn't function properly
@@ -66,7 +77,7 @@ class Agent {
         // does this break async best practices?
         function handlerWrapper(event: any, context: any, originalCallback: any){
             var wrappedCallback = wrapCallback(originalCallback)
-            transaction.start(context)
+            transaction.start(event, context)
             var response:any = null
             try {
                 response = handler(event, context, wrappedCallback)         

@@ -174,21 +174,21 @@ export interface TransactionConfiguration {
 
 export interface AppConfig {
     /*App Key to IOT Application in AppDynamics*/
-    appKey?: string;
+    appKey: string; // DONE
     /*Optional key that will look at the event.headers for a uniqueid.  If none given, datetime.now() is used as a uniquekey */
-    uniqueIDHeader?: string;
+    uniqueIDHeader?: string; // DONE
     /*String of which log level reporting to be done*/
-    loglevel?: string;
+    loglevel?: string; // DSMTODO
     /*Map of header key to data type to look for in event.headers*/
-    lambdaHeaders?:DataTypeMap;
+    lambdaHeaders?:DataTypeMap; // DONE
     /*Map of header key to data type to look for in request.headers*/
-    requestHeaders?:DataTypeMap;
+    requestHeaders?:DataTypeMap; // DONE
     /*Map of header key to data type to look for in resp.headers*/
-    responseHeaders?:DataTypeMap;
+    responseHeaders?:DataTypeMap; // DONE
     /*Map of property to data type to look for in event*/
-    eventData?:DataTypeMap;
+    eventData?:DataTypeMap; // DONE
     /*Map of parameter to data type to look for in aws services*/
-    AWSData?:DataTypeMap;
+    AWSData?:DataTypeMap; // DSMTODO
 }
 
 export enum LOGLEVEL {
@@ -202,7 +202,7 @@ export enum LOGLEVEL {
 declare global {
     namespace NodeJS {
         interface Global {
-            appdynamicsLambdaTransaction: LambdaTransaction
+            txn: LambdaTransaction
         }
     }
 }

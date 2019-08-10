@@ -14,30 +14,49 @@ class HelperMethods {
         }
         return obj;
     }
-    static findEventDataInformation(event:any, BeaconProperties:BeaconProperties, configMap: DataTypeMap) {
+
+    static setStringProperty(stringMap: StringMap, key:string, value:string){
+
+        if(key.length > 24){
+            console.warn('truncating beacon string property to under 24 characters, original key was: ' + key)
+            key = key.substr(0, 24)
+        }
+
+        if(value && value.length > 128){
+            console.warn('truncating beacon string property value to under 128 characters, key in question is: ' + key)
+            value = value.substr(0, 128)
+        }
+
+        stringMap[key] = value
+    }
+
+    static findEventDataInformation(event:any, configMap: DataTypeMap) {
         var eventDataFound = false;
+        var beaconProperties: BeaconProperties = {
+            stringProperties: {},
+            booleanProperties: {},
+            doubleProperties: {},
+            datetimeProperties: {}
+        };
         if (configMap) {
             for (var dataKey in configMap) {
                 if (event && event[dataKey]) {
                     eventDataFound = true;
                     Logger.debug(`Found Event Data for : ${dataKey}`);
                     var datatype: DataType = configMap[dataKey];
+                    var dataKey = dataKey.toLowerCase() + "_evt"
                     switch (datatype) {
                         case DataType.STRING:
-                            if (BeaconProperties.stringProperties)
-                                BeaconProperties.stringProperties[dataKey.toLowerCase() + "_evt"] = event[dataKey];
+                            HelperMethods.setStringProperty(beaconProperties.stringProperties, dataKey, event[dataKey])
                             break;
                         case DataType.DATETIME:
-                            if (BeaconProperties.datetimeProperties)
-                                BeaconProperties.datetimeProperties[dataKey.toLowerCase() + "_evt"] = new Date(event[dataKey]).getTime();
+                            beaconProperties.datetimeProperties[dataKey] = new Date(event[dataKey]).getTime();
                             break;
                         case DataType.BOOLEAN:
-                            if (BeaconProperties.booleanProperties)
-                                BeaconProperties.booleanProperties[dataKey.toLowerCase() + "_evt"] = event[dataKey];
+                            beaconProperties.booleanProperties[dataKey] = event[dataKey];
                             break;
                         case DataType.DOUBLE:
-                            if (BeaconProperties.doubleProperties)
-                                BeaconProperties.doubleProperties[dataKey.toLowerCase() + "_evt"] = event[dataKey];
+                            beaconProperties.doubleProperties[dataKey] = event[dataKey];
                             break;
                         default:
                             Logger.warn(`DataType "${datatype}" is not a valid datatype`);
@@ -49,18 +68,16 @@ class HelperMethods {
         }
         return {
             eventDataFound: eventDataFound,
-            beaconProperties: BeaconProperties
-
+            beaconProperties: beaconProperties
         }
     }
     static goThroughHeaders(res: any, append: string, configMap: DataTypeMap): any {
         var headersFound = false;
-        var BeaconProperties: BeaconProperties = {
+        var beaconProperties: BeaconProperties = {
             stringProperties: {},
             booleanProperties: {},
             doubleProperties: {},
             datetimeProperties: {}
-
         };
         if (configMap) {
             for (var headerKey in configMap) {
@@ -70,20 +87,16 @@ class HelperMethods {
                     var datatype: DataType = configMap[headerKey];
                     switch (datatype) {
                         case DataType.STRING:
-                            if (BeaconProperties.stringProperties)
-                                BeaconProperties.stringProperties[headerKey.toLowerCase() + append] = res.headers[headerKey];
+                            HelperMethods.setStringProperty(beaconProperties.stringProperties, headerKey.toLowerCase() + append, res.header[headerKey])
                             break;
                         case DataType.DATETIME:
-                            if (BeaconProperties.datetimeProperties)
-                                BeaconProperties.datetimeProperties[headerKey.toLowerCase() + append] = new Date(res.headers[headerKey]).getTime();
+                            beaconProperties.datetimeProperties[headerKey.toLowerCase() + append] = new Date(res.headers[headerKey]).getTime();
                             break;
                         case DataType.BOOLEAN:
-                            if (BeaconProperties.booleanProperties)
-                                BeaconProperties.booleanProperties[headerKey.toLowerCase() + append] = res.headers[headerKey];
+                            beaconProperties.booleanProperties[headerKey.toLowerCase() + append] = res.headers[headerKey];
                             break;
                         case DataType.DOUBLE:
-                            if (BeaconProperties.doubleProperties)
-                                BeaconProperties.doubleProperties[headerKey.toLowerCase() + append] = res.headers[headerKey];
+                            beaconProperties.doubleProperties[headerKey.toLowerCase() + append] = res.headers[headerKey];
                             break;
                         default:
                             Logger.warn(`DataType "${datatype}" is not a valid datatype`);
@@ -95,10 +108,10 @@ class HelperMethods {
         }
         return {
             headersFound: headersFound,
-            beaconProperties: BeaconProperties
-
+            beaconProperties: beaconProperties
         }
     }
+    
     /*
     static findEventHeaderInformation(event: any): any {
 
@@ -161,21 +174,15 @@ class HelperMethods {
     }
 
     static mergeBeaconProperties(beaconprop1:BeaconProperties, beaconprop2:BeaconProperties) {
-        var BeaconProperties: BeaconProperties = {
-            stringProperties: {},
-            booleanProperties: {},
-            doubleProperties: {},
-            datetimeProperties: {}
-
-        };
-        BeaconProperties.stringProperties = {...beaconprop1.stringProperties, ...beaconprop2.stringProperties }
-        BeaconProperties.booleanProperties = {...beaconprop1.booleanProperties, ...beaconprop2.booleanProperties }
-        BeaconProperties.doubleProperties = {...beaconprop1.doubleProperties, ...beaconprop2.doubleProperties }
-        BeaconProperties.datetimeProperties = {...beaconprop1.datetimeProperties, ...beaconprop2.datetimeProperties }
-        
-        return BeaconProperties;
+        return {
+            stringProperties: Object.assign(beaconprop1.stringProperties, beaconprop2.stringProperties),
+            booleanProperties: Object.assign(beaconprop1.booleanProperties, beaconprop2.booleanProperties),
+            doubleProperties: Object.assign(beaconprop1.doubleProperties, beaconprop2.doubleProperties),
+            datetimeProperties: Object.assign(beaconprop1.datetimeProperties, beaconprop2.datetimeProperties)
+        } as BeaconProperties;
     }
     static setPropertiesOnEvent(event: ErrorEvent | NetworkRequestEvent | CustomEvent, properties: BeaconProperties | undefined) {
+
         if (properties) {
             if (properties.stringProperties) {
                 if (event.stringProperties) {
