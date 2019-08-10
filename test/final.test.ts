@@ -97,6 +97,8 @@ describe('final', function() {
 
     it('awsHandler_basic', function() {
 
+        // process.env.APPDYNAMICS_ENABLED = "false"
+
         var config:AppConfig = {
             appKey: 'AD-AAB-AAR-SKR',
             uniqueIDHeader: undefined,

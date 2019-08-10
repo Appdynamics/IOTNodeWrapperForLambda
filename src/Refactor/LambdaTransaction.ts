@@ -169,7 +169,7 @@ class LambdaTransaction {
     }
 
     customData(properties?: BeaconProperties){
-        if(!properties){
+        if(!this.config.instrumentationEnabled || !properties){
             return
         }
         if(properties.stringProperties){

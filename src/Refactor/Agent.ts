@@ -23,13 +23,19 @@ class Agent {
         var logLevel = config.loglevel ? config.loglevel : 'DEBUG'
         Logger.init(logLevel)
 
+        var transaction = new LambdaTransaction(config);
+        global.txn = transaction
+
+
+        if(!config.instrumentationEnabled){
+            Logger.info('Handler will not be instrumented as specified by the "instrumentationEnabled" or environment variable APPDYNAMICS_ENABLED configuration.')
+            return handler
+        }
+
         if(!config.appKey){
             Logger.warn('handler will not be instrumented, please provide an appKey')
             return handler
         }
-
-        var transaction = new LambdaTransaction(config);
-        global.txn = transaction
 
         if(isAsync(handler)){
             Logger.debug('Instrumenting async function.')

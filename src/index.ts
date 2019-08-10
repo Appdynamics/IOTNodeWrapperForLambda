@@ -173,22 +173,25 @@ export interface TransactionConfiguration {
 }
 
 export interface AppConfig {
-    /*App Key to IOT Application in AppDynamics*/
-    appKey: string; // DONE
-    /*Optional key that will look at the event.headers for a uniqueid.  If none given, datetime.now() is used as a uniquekey */
-    uniqueIDHeader?: string; // DONE
-    /*String of which log level reporting to be done*/
-    loglevel?: string; // DSMTODO
-    /*Map of header key to data type to look for in event.headers*/
-    lambdaHeaders?:DataTypeMap; // DONE
-    /*Map of header key to data type to look for in request.headers*/
-    requestHeaders?:DataTypeMap; // DONE
-    /*Map of header key to data type to look for in resp.headers*/
-    responseHeaders?:DataTypeMap; // DONE
-    /*Map of property to data type to look for in event*/
-    eventData?:DataTypeMap; // DONE
-    /*Map of parameter to data type to look for in aws services*/
-    AWSData?:DataTypeMap; // DSMTODO
+    // App Key to IOT Application in AppDynamics
+    appKey: string;
+    // whether or not to instrument at all
+    instrumentationEnabled?: boolean
+    // Optional key that will look at the event.headers for a uniqueid.  If none given, datetime.now() is used as a uniquekey
+    uniqueIDHeader?: string;
+    // String of which log level reporting to be done
+    loglevel?: string;
+    // Map of header key to data type to look for in event.headers
+    lambdaHeaders?:DataTypeMap;
+    // Map of header key to data type to look for in request.headers
+    requestHeaders?:DataTypeMap;
+    // Map of header key to data type to look for in resp.headers
+    responseHeaders?:DataTypeMap;
+    // Map of property to data type to look for in event
+    eventData?:DataTypeMap;
+    // Map of parameter to data type to look for in aws services
+    AWSData?:DataTypeMap;
+
 }
 
 export enum LOGLEVEL {

@@ -34,13 +34,13 @@ class Logger {
 
     static info(msg:string) {
         if(LOGLEVEL.INFO >= this.level) {
-            console.info('AppDynamics:Info: ' + msg)
+            console.info('AppDynamics:Info : ' + msg)
         }
     }
 
     static warn(msg:string) {
         if(LOGLEVEL.WARN >= this.level) {
-            console.warn('AppDynamics:Warn: ' + msg)
+            console.warn('AppDynamics:Warn:  ' + msg)
         }
     }
 
