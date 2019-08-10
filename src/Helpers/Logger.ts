@@ -1,12 +1,8 @@
 import { LOGLEVEL } from "../index"
 class Logger {
-    static level:LOGLEVEL = LOGLEVEL.ERROR;
 
+    static level:LOGLEVEL = LOGLEVEL.INFO;
 
-    static appString = "Appdynamics";
-    static print(level:string, msg: string) {
-        console.log(`${this.appString}::${level}::${msg}`)
-    }
     static init(level:string) {
         if(level) {
             switch(level) {
@@ -29,24 +25,28 @@ class Logger {
           
         }
     }
+
     static debug(msg:string) {
         if(LOGLEVEL.DEBUG >= this.level) {
-            this.print('DEBUG', msg);
+            console.debug('AppDynamics :: ' + msg)
         }
     }
+
     static info(msg:string) {
         if(LOGLEVEL.INFO >= this.level) {
-            this.print('INFO', msg);
+            console.info('AppDynamics :: ' + msg)
         }
     }
+
     static warn(msg:string) {
         if(LOGLEVEL.WARN >= this.level) {
-            this.print('WARN', msg);
+            console.warn('AppDynamics :: ' + msg)
         }
     }
-    static error(msg:string) {
+
+    static error(msg:any) {
         if(LOGLEVEL.ERROR >= this.level) {
-            this.print('ERROR', msg);
+            console.error('AppDynamics :: ' + msg)
         }
     }
 }

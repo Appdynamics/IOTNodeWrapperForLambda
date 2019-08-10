@@ -63,7 +63,7 @@ class AppAgent {
             loglevel = initConfig.loglevel;
             logset = true;
         } else if (process.env.APPDYNAMICS_LOGLEVEL) {
-            loglevel = process.env.APPDYNAMICS_LOGLEVEL;
+            loglevel = process.env.APPDYNAMICS_LOGLEVEL; // dsmtodo
             logset = true;
         }
         Logger.init(loglevel);
@@ -71,7 +71,7 @@ class AppAgent {
         // this is a helper function
         function isFunction(functionToCheck: any) {
             var string2check = {}.toString.call(functionToCheck);
-            return functionToCheck && (string2check === '[object Function]' || string2check === '[object AsyncFunction]');
+            return functionToCheck && (string2check === '[object Function]' || string2check === '[object AsyncFunction]'); // DSMTODO
         }
         var newfunc = undefined;
 
@@ -148,7 +148,7 @@ class AppAgent {
                 // i think the intent is that if either or is set, then we are instrumenting. should be a part of an initial validation step
                 if ((
                         process.env.APPDYNAMICS_ENABLED 
-                        && process.env.APPDYNAMICS_ENABLED === "true"
+                        && process.env.APPDYNAMICS_ENABLED === "true" //dsmtodo
                     ) 
                     || (
                         !processenvironmentset_enabled 

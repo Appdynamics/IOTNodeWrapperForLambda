@@ -12,11 +12,11 @@ import { Beacon } from './Beacon';
 import { Timer } from './Timer';
 import http = require('http');
 import URL = require('url')
-import { stringify } from 'querystring';
 import { HelperMethods } from '../Helpers/HelperMethods';
-// import https = require('https')
+import { Logger } from '../Helpers/Logger';
 
-enum LAMDA_TRANSACTION_STATE {
+
+enum LAMBDA_TRANSACTION_STATE {
     INIT = 0,
     STARTED = 1,
     STOPPED = 2,
@@ -61,7 +61,7 @@ export interface LambdaContext {
 // must be guarnteed to never throw or leak an exception! all things handled gracefully here
 class LambdaTransaction {
 
-    private state: LAMDA_TRANSACTION_STATE = LAMDA_TRANSACTION_STATE.INIT
+    private state: LAMBDA_TRANSACTION_STATE = LAMBDA_TRANSACTION_STATE.INIT
     private beacon: Beacon
     private lambdaContext: any
     private timer: Timer
@@ -90,16 +90,37 @@ class LambdaTransaction {
         return this.state
     }
 
+    getStateFormatted(){
+        switch(this.getState()){
+            case LAMBDA_TRANSACTION_STATE.INIT:
+                return 'INIT'
+            case LAMBDA_TRANSACTION_STATE.STARTED:
+                return 'STARTED'
+            case LAMBDA_TRANSACTION_STATE.STOPPED:
+                return 'STOPPED'
+            case LAMBDA_TRANSACTION_STATE.TRANSACTION_ERROR:
+                return 'TRANSACTION_ERROR'
+            case LAMBDA_TRANSACTION_STATE.VALIDATION_ERROR:
+                return 'VALIDATION_ERROR'
+            case LAMBDA_TRANSACTION_STATE.SEND_BEACON_ERROR:
+                return 'SEND_BEACON_ERROR'
+            case LAMBDA_TRANSACTION_STATE.APP_DISABLED:
+                return 'APP_DISABLED'
+        }
+        return this.state
+    }
+
     start(lambdaEvent:any, lambdaContext:LambdaContext){
         // already started
-        if(this.state != LAMDA_TRANSACTION_STATE.INIT){
-            console.error('an attempt was made to start the transaction in a non-initiated state, state was: ' + this.state)
+        if(this.state != LAMBDA_TRANSACTION_STATE.INIT){
+            Logger.error('an attempt was made to start the transaction in a non-initiated state, state was: ' + this.state)
             throw new Error('an attempt was made to start the transaction in a non-initiated state')
         }
 
+        // dsm todo there is an environment variable to check as well
         if(this.debug && !this.api.isAppEnabled()){
-            this.state = LAMDA_TRANSACTION_STATE.APP_DISABLED
-            console.warn('The application for the AppKey provided is disabled. The AppD agent will not report any metrics. If the application should be activated, please review your controller and validate you provided the correct AppKey. AppKey Provided was: ' + this.appKey)
+            this.state = LAMBDA_TRANSACTION_STATE.APP_DISABLED
+            Logger.warn('The application for the AppKey provided is disabled. The AppD agent will not report any metrics. If the application should be activated, please review your controller and validate you provided the correct AppKey. AppKey Provided was: ' + this.appKey)
             return
         }
 
@@ -142,10 +163,14 @@ class LambdaTransaction {
         // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Request.html
 
         this.timer.start()
-        this.state = LAMDA_TRANSACTION_STATE.STARTED
+        this.state = LAMBDA_TRANSACTION_STATE.STARTED
+
+        Logger.info('Transaction instrumented successfully and started.')
     }
 
     private instrumentHttpRequestFunction(){
+
+        Logger.debug('LambdaTransaction.instrumentHttpRequestFunction start')
 
         // TODO handle scenario where if this gets called a second time a warning needs to be displayed.
         // code will end up reporting inaccurate beacons in this edge scenario
@@ -163,8 +188,12 @@ class LambdaTransaction {
         var originalHttpRequest = http.request
         http.request = function httpRequestWrapper() {
 
+            Logger.debug('LambdaTransaction.instrumentHttpRequestFunction.request start')
+
             var url = lambdaTransaction.getUrlFromOptions(arguments[0])
+            Logger.debug('LambdaTransaction.instrumentHttpRequestFunction.request url to intercept: ' + url)
             if(url.indexOf("appdynamics") >= 0){
+                Logger.debug('Skipping interceptor out to appdynamics.')
                 return originalHttpRequest.apply(this, arguments as any)
             }
 
@@ -174,7 +203,9 @@ class LambdaTransaction {
             var originalCallback = arguments[1]
             var callingContext = this
 
-            arguments[1] = function callbackWrapper(response:any){                
+            arguments[1] = function callbackWrapper(response:any){  
+
+                Logger.debug('LambdaTransaction.instrumentHttpRequestFunction.request.callback start')              
 
                 requestTimer.stop()     
 
@@ -202,8 +233,11 @@ class LambdaTransaction {
                 lambdaTransaction.addNetworkRequest(networkRequestEvent)
 
                 if(originalCallback){
+                    Logger.debug('LambdaTransaction.instrumentHttpRequestFunction.request.callback.original start')    
                     originalCallback.apply(callingContext, [response])
+                    Logger.debug('LambdaTransaction.instrumentHttpRequestFunction.request.callback.original end')    
                 }
+                Logger.debug('LambdaTransaction.instrumentHttpRequestFunction.request.callback end')     
             }
 
             var request = originalHttpRequest.apply(this, [arguments[0], arguments[1]])
@@ -211,7 +245,8 @@ class LambdaTransaction {
             // https://nodejs.org/api/http.html#http_http_request_options_callback
             request.on('error', function(error:any){
 
-                console.error(`problem with request: ${error.message}`);
+                Logger.error('LambdaTransaction.instrumentHttpRequestFunction.request error occured.')
+                Logger.error(error)
 
                 requestTimer.stop()
 
@@ -235,6 +270,7 @@ class LambdaTransaction {
                 throw error
             })
 
+            Logger.debug('LambdaTransaction.instrumentHttpRequestFunction.request end')
             return request
         }
 
@@ -260,12 +296,14 @@ class LambdaTransaction {
 
     stop(){
         // nothing to stop
-        if(this.state != LAMDA_TRANSACTION_STATE.STARTED){
+        if(this.state != LAMBDA_TRANSACTION_STATE.STARTED){
             console.warn('an attempt was made to stop the transaction in a non-started state, state was: ' + this.state)
             return
         }
 
         this.timer.stop()
+        Logger.info('Transaction instrumentation execution stopped and beacon is about to send. Time elapsed in ms: ' + this.timer.getTimeElapsed() + ', State prior to stop: ' + this.getStateFormatted())
+        this.state = LAMBDA_TRANSACTION_STATE.STOPPED
 
         var customEvent:CustomEvent = {
             timestamp: this.timer.getStartTime(),
@@ -286,8 +324,8 @@ class LambdaTransaction {
     }
 
     handleInvalidBeacon(){
-        console.error('Beacon is not valid, see logs for more information.')
-        this.state = LAMDA_TRANSACTION_STATE.VALIDATION_ERROR
+        Logger.error('Beacon is not valid, see logs for more information.')
+        this.state = LAMBDA_TRANSACTION_STATE.VALIDATION_ERROR
         return
     }
 
@@ -298,12 +336,12 @@ class LambdaTransaction {
     }
 
     handleSendBeaconSuccess(response:any){
-        console.log('handleSendBeaconSuccess')
+        Logger.debug('handleSendBeaconSuccess')
     }
 
     handleSendBeaconError(error: Error){
-        console.error('handleSendBeaconError')
-        console.error(error)
+        Logger.error('handleSendBeaconError')
+        Logger.error(error)
     }
 
     addError(error: Error){
@@ -315,10 +353,6 @@ class LambdaTransaction {
         HelperMethods.setPropertiesOnEvent(errorEvent, this.globalBeaconProperties)
         this.beacon.addErrorEvent(errorEvent)
     }
-
-    //addRejectedPromise(reason: any, promise: any){
-        // send beacon
-    //}
 
     addNetworkRequest(networkRequestEvent: NetworkRequestEvent){
         this.beacon.addNetworkRequestEvent(networkRequestEvent)

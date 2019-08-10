@@ -1,5 +1,6 @@
 import { LambdaTransaction, LambdaContext } from './LambdaTransaction'
 import { AppConfig, BooleanMap, DataType, DataTypeMap, BeaconProperties } from "../index";
+import { Logger } from 'src/Helpers/Logger';
 
 /*
 const AsyncFunction = require('./async-function');
@@ -20,12 +21,24 @@ class Agent {
     static instrumentHandler(handler: Function, config: AppConfig):Function{
         
         if(!config.appKey){
-            console.warn('handler will not be instrumented, please provide an appKey')
+            Logger.warn('handler will not be instrumented, please provide an appKey')
             return handler
         }
 
         var transaction = new LambdaTransaction(config);
         global.txn = transaction
+
+        if(isAsync(handler)){
+            Logger.debug('Instrumenting async function.')
+            return async function handlerWrapperAsync(event: any, context: any, originalCallback: any){
+                return handlerWrapper(event, context, originalCallback)               
+            }
+        } else {
+            Logger.debug('Instrumenting sync function.')
+            return function handlerWrapperSync(event: any, context: any, originalCallback?: any){
+                return handlerWrapper(event, context, originalCallback)
+            }
+        }
 
         function isAsync (func:any) {
             // todo this doesn't function properly
@@ -43,10 +56,12 @@ class Agent {
 
         function handleHttpErrorIfPresent(response:any){
             if(!isNaN(response) && isHttpErrorCode(response)) {
+                Logger.debug('Agent.handleHttpErrorIfPresent error code found')
                 var transactionError = new Error()
                 transactionError.name = response
                 transaction.addError(transactionError)
             } else if(isHttpErrorResponse(response)){
+                Logger.debug('Agent.handleHttpErrorIfPresent error response found')
                 // it should always have a body in this instance per spec
                 // https://docs.aws.amazon.com/apigateway/latest/developerguide/handle-errors-in-lambda-integration.html
                 var errorMessage:string = response.body
@@ -69,6 +84,7 @@ class Agent {
 
         function wrapCallback(originalCallback:any){
             return function(error: Error, response?: any){
+                Logger.debug('Agent.wrapCallback wrapper callback')
                 handleHttpErrorIfPresent(response)
                 return originalCallback.apply(null, error, response)
             }
@@ -83,12 +99,15 @@ class Agent {
                 response = handler(event, context, wrappedCallback)         
             }
             catch (error) {
+                Logger.error('Handler execution threw error')
+                Logger.error(error)
                 transaction.addError(error)
                 transaction.stop()
                 throw error
             } 
 
              if (isPromise(response)) {
+                Logger.debug('Agent.handlerWrapper.response is promise.')
                 return new Promise((resolve, reject) => {
                     response.then(function(response:any){
                         handleHttpErrorIfPresent(response)
@@ -102,28 +121,19 @@ class Agent {
                     })
                 })
             } else if(isError(response)) {
+                Logger.debug('Agent.handlerWrapper.response is error.')
                 transaction.addError(response)
                 transaction.stop()
                 return response
             } else if (response) {
+                Logger.debug('Agent.handlerWrapper.response is object.')
                 handleHttpErrorIfPresent(response)
                 transaction.stop()
                 return response
             } else {
+                Logger.debug('Agent.handlerWrapper.response not returned.')
                 transaction.stop()
                 return response
-            }
-        }
-
-        if(isAsync(handler)){
-            console.log('async')
-            return async function handlerWrapperAsync(event: any, context: any, originalCallback: any){
-                return handlerWrapper(event, context, originalCallback)               
-            }
-        } else {
-            console.log('sync')
-            return function handlerWrapperSync(event: any, context: any, originalCallback?: any){
-                return handlerWrapper(event, context, originalCallback)
             }
         }
     }
