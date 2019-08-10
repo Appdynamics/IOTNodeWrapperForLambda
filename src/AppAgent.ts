@@ -13,7 +13,6 @@ class AppAgent {
             } as AppConfig
         }
 
-        console.log('dsn' + process.env.APPDYNAMICS_ENABLED)
         if (process.env.APPDYNAMICS_ENABLED && process.env.APPDYNAMICS_ENABLED === "false"){
             config.instrumentationEnabled = false
         } else {
