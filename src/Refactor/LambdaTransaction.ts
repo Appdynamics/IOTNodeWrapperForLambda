@@ -235,10 +235,7 @@ class LambdaTransaction {
                 
                 // request props
                 if(requestProperties.headersFound){
-                    console.log(lambdaTransaction.globalBeaconProperties)
-                    // BUG, this is some how setting data on lambdaTransaction.globalBeaconProperties
                     HelperMethods.setPropertiesOnEvent(networkRequestEvent, requestProperties.beaconProperties)
-                    console.log(lambdaTransaction.globalBeaconProperties)
                 }
 
                 // response props
