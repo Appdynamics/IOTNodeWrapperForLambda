@@ -52,9 +52,10 @@ handler = AppAgent.init(handler, {
 */
 
 import { AppAgent } from '../src/AppAgent'
-import { AppConfig, BooleanMap, DataType, DataTypeMap, BeaconProperties } from "../src/index";
+import { AppConfig, BooleanMap, DataType, DataTypeMap, BeaconProperties, StringMap } from "../src/index";
 import { LambdaTransaction, LambdaContext } from '../src/Refactor/LambdaTransaction'
 import http = require('http');
+import { Beacon } from '../src/Refactor/Beacon';
 const assert = require('assert');
 
 // note why does this need to be added, and how does this correlate to index.ts when everything is compiled and ran in the lambda context?
@@ -62,7 +63,7 @@ const assert = require('assert');
 declare global {
     namespace NodeJS {
         interface Global {
-            appdynamicsLambdaTransaction: LambdaTransaction
+            txn: LambdaTransaction
         }
     }
 } 
@@ -79,7 +80,13 @@ describe('final', function() {
 
     async function awsHandler_basic(event: any, context: any, callback: any){
         // wait(10)
-        // todo call global.txn.customData({})
+        var stringProps = {
+            'testKeytestKeytestKeytestKeytestKeytestKey': 'testValuetestValuetestValuetestValuetestValuetestValuetestValuetestValuetestValuetestValuetestValuetestValuetestValuetestValuetestValuetestValuetestValuetestValuetestValuetestValuetestValuetestValuetestValue'
+        } as StringMap
+        var beaconProps = {
+            stringProperties : stringProps
+        } as BeaconProperties
+        global.txn.customData(beaconProps);
         console.log('handled')
         callback()
     }

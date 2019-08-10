@@ -168,6 +168,20 @@ class LambdaTransaction {
         Logger.info('Transaction instrumented successfully and started.')
     }
 
+    customData(properties?: BeaconProperties){
+        if(!properties){
+            return
+        }
+        if(properties.stringProperties){
+            var scrubbedStringProps = {} as StringMap
+            for(var key in properties.stringProperties){
+                HelperMethods.setStringProperty(scrubbedStringProps, key, properties.stringProperties[key])
+            }
+            properties.stringProperties = scrubbedStringProps
+        }
+        HelperMethods.mergeBeaconProperties(this.globalBeaconProperties, properties)
+    }
+    
     private instrumentHttpRequestFunction(){
 
         Logger.debug('LambdaTransaction.instrumentHttpRequestFunction start')
