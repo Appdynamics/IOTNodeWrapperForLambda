@@ -2,6 +2,11 @@
 
 A javascript node library to report lambda timing using IOT Agent
 
+# Warning
+Use at your own risk.  This code was developed to give nodejs lambda insights before the official NodeJS Lambda Agent was released.  Official nodejs lambda support for AppDynamics is available.  This wrapper should no longer be used as the official agent now exists. See https://docs.appdynamics.com/display/PRO45/Node.js+Serverless+Tracer for more details.
+
+
+This uses the AppDynamics IOT api to send timing data for lambda.  This requires iot licenses to report the data. 
 
 ### Prerequisites
 
